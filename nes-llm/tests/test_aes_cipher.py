@@ -3,7 +3,7 @@ from src.crypto.aes_cipher import (
 )
 
 message = (
-    "HELLO NES"
+    "In this case, ✌️ all the students of group will participate in presentation. Group members may co-ordinate among themselves and distribute their part of presentation accordingly"
 )
 
 password = (
