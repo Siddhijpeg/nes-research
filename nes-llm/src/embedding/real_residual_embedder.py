@@ -80,7 +80,7 @@ def main():
     print("\nResidual Shape:")
     print(residual.shape)
 
-    message = "MY NAME IS NES I AM SO SO SO STUPID"
+    message = "MY NAME IS NES I AM SO SO SO STUPID AND I CAN'T EVEN EMBED A MESSAGE PROPERLY"
 
     bits = PayloadEncoder.text_to_bits(
         message
