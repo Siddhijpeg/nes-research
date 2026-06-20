@@ -6,7 +6,10 @@ from transformers import (
     BitsAndBytesConfig,
 )
 
-from bitsandbytes.functional import dequantize_4bit
+from bitsandbytes.functional import (
+    quantize_4bit,
+    dequantize_4bit,
+)
 
 from src.embedding.keyed_residual_embedder import (
     KeyedResidualEmbedder,
@@ -18,7 +21,9 @@ MODEL_ID = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 def build_residual(fp16_layer, nf4_layer):
 
     fp16_weight = (
-        fp16_layer.weight.data.float().cpu()
+        fp16_layer.weight.data
+        .float()
+        .cpu()
     )
 
     nf4_weight = (
@@ -67,26 +72,22 @@ def main():
         device_map="cpu",
     )
 
-    families = {
+    layer_fp16 = (
+        fp16.model.layers[0]
+        .mlp.down_proj
+    )
 
-        "down_proj": (
-            fp16.model.layers[0].mlp.down_proj,
-            nf4.model.layers[0].mlp.down_proj,
-        ),
+    layer_nf4 = (
+        nf4.model.layers[0]
+        .mlp.down_proj
+    )
 
-        "gate_proj": (
-            fp16.model.layers[0].mlp.gate_proj,
-            nf4.model.layers[0].mlp.gate_proj,
-        ),
-
-        "up_proj": (
-            fp16.model.layers[0].mlp.up_proj,
-            nf4.model.layers[0].mlp.up_proj,
-        ),
-    }
+    residual = build_residual(
+        layer_fp16,
+        layer_nf4,
+    )
 
     payloads = [
-        100,
         1000,
         10000,
         50000,
@@ -95,58 +96,60 @@ def main():
 
     results = {}
 
-    for name, (fp16_layer, nf4_layer) in families.items():
+    for payload in payloads:
 
-        print(f"\n===== {name} =====")
+        print(f"\nPayload: {payload}")
 
-        residual = build_residual(
-            fp16_layer,
-            nf4_layer,
-        )
+        bits = torch.randint(
+            0,
+            2,
+            (payload,),
+        ).tolist()
 
-        results[name] = {}
-
-        for payload in payloads:
-
-            bits = torch.randint(
-                0,
-                2,
-                (payload,),
-            ).tolist()
-
-            stego = KeyedResidualEmbedder.embed_bits(
+        stego = (
+            KeyedResidualEmbedder.embed_bits(
                 residual.clone(),
                 bits,
                 "nes_secret",
             )
+        )
 
-            recovered = (
-                KeyedResidualEmbedder.extract_bits(
-                    embedded_tensor=stego,
-                    secret_key="nes_secret",
-                    num_bits=payload,
-                )
-            )
+        print("NF4 Quantizing...")
 
-            ber = bit_error_rate(
-                bits,
-                recovered,
-            )
+        qweight, qstate = quantize_4bit(
+            stego,
+            quant_type="nf4",
+        )
 
-            acc = 1 - ber
+        requantized = dequantize_4bit(
+            qweight,
+            quant_state=qstate,
+        )
 
-            results[name][payload] = {
-                "ber": ber,
-                "accuracy": acc,
-            }
-
-            print(
+        recovered = (
+            KeyedResidualEmbedder.extract_bits(
+                requantized,
+                "nes_secret",
                 payload,
-                results[name][payload],
             )
+        )
+
+        ber = bit_error_rate(
+            bits,
+            recovered,
+        )
+
+        acc = 1 - ber
+
+        results[payload] = {
+            "ber": ber,
+            "accuracy": acc,
+        }
+
+        print(results[payload])
 
     with open(
-        "recovery_results.json",
+        "nf4_requantization_results.json",
         "w",
     ) as f:
 
@@ -157,7 +160,7 @@ def main():
         )
 
     print(
-        "\nSaved recovery_results.json"
+        "\nSaved nf4_requantization_results.json"
     )
 
 

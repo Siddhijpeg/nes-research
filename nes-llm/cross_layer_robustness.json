@@ -1,0 +1,17 @@
+{
+    "down_proj": {
+        "sigma": 0.01,
+        "ber": 0.44371,
+        "accuracy": 0.55629
+    },
+    "gate_proj": {
+        "sigma": 0.01,
+        "ber": 0.44149,
+        "accuracy": 0.5585100000000001
+    },
+    "up_proj": {
+        "sigma": 0.01,
+        "ber": 0.4421,
+        "accuracy": 0.5579000000000001
+    }
+}
