@@ -1,6 +1,6 @@
 import torch
 
-from src.embedding.strategy_base import (
+from src.embedding.strategies.strategy_base import (
     EmbeddingStrategy,
 )
 

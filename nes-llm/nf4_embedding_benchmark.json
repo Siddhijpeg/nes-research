@@ -1,0 +1,18 @@
+[
+    {
+        "strategy": "Sign",
+        "ber": 0.0,
+        "accuracy": 1.0,
+        "payload_bits": 336,
+        "capacity": 4194304,
+        "utilization": 8.0108642578125e-05
+    },
+    {
+        "strategy": "NF4-QAE",
+        "ber": 0.0,
+        "accuracy": 1.0,
+        "payload_bits": 336,
+        "capacity": 4194304,
+        "utilization": 8.0108642578125e-05
+    }
+]

@@ -1,0 +1,70 @@
+{
+    "Sign": {
+        "1_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "2_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "5_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "10_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "20_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "50_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "100_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        },
+        "1000_cycles": {
+            "ber": 0.0,
+            "accuracy": 1.0
+        }
+    },
+    "NF4-QAE": {
+        "1_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "2_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "5_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "10_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "20_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "50_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "100_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        },
+        "1000_cycles": {
+            "ber": 0.00591,
+            "accuracy": 0.99409
+        }
+    }
+}
