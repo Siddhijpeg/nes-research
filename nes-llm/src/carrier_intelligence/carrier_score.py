@@ -3,34 +3,34 @@ import torch
 
 class CarrierScore:
     """
-    Computes the overall carrier score used
-    for payload allocation.
+    Multi-dimensional Carrier Utility Scoring.
 
-    Score
+    Pipeline
 
-        S = wQ·Q + wC·C + wM·M
+        Feature Matrix
+              ↓
+      Column-wise Normalization
+              ↓
+      Data-driven Feature Weighting
+              ↓
+      Weighted Feature Fusion
+              ↓
+      Non-linear Amplification
+              ↓
+         Carrier Utility Score
     """
 
     def __init__(
 
         self,
 
-        quality_weight=0.50,
-
-        confidence_weight=0.30,
-
-        margin_weight=0.20,
+        gamma=2.5,
 
         eps=1e-8,
 
     ):
 
-        self.wq = quality_weight
-
-        self.wc = confidence_weight
-
-        self.wm = margin_weight
-
+        self.gamma = gamma
         self.eps = eps
 
     ##########################################################
@@ -39,21 +39,27 @@ class CarrierScore:
 
         self,
 
-        x,
+        features,
 
     ):
 
+        features = features.float()
+
+        minimum = features.min(
+            dim=0
+        ).values
+
+        maximum = features.max(
+            dim=0
+        ).values
+
         return (
 
-            x - x.min()
+            features - minimum
 
         ) / (
 
-            x.max()
-
-            - x.min()
-
-            + self.eps
+            maximum - minimum + self.eps
 
         )
 
@@ -63,38 +69,58 @@ class CarrierScore:
 
         self,
 
-        quality,
-
-        confidence,
-
-        margin,
+        features,
 
     ):
 
-        quality = self.normalize(
-            quality
+        ##################################################
+        # Normalize every feature independently
+        ##################################################
+
+        features = self.normalize(
+            features
         )
 
-        confidence = self.normalize(
-            confidence
+        ##################################################
+        # Data-driven feature importance
+        #
+        # Features with higher variance
+        # contribute more because they
+        # discriminate carriers better.
+        ##################################################
+
+        importance = features.std(
+            dim=0
         )
 
-        margin = self.normalize(
-            margin
+        importance = importance / (
+
+            importance.sum()
+
+            + self.eps
+
         )
+
+        ##################################################
+        # Weighted feature fusion
+        ##################################################
 
         score = (
 
-            self.wq * quality
+            features
 
-            +
+            * importance
 
-            self.wc * confidence
+        ).sum(
+            dim=1
+        )
 
-            +
+        ##################################################
+        # Non-linear carrier amplification
+        ##################################################
 
-            self.wm * margin
-
+        score = score.pow(
+            self.gamma
         )
 
         return score
@@ -129,11 +155,9 @@ class CarrierScore:
 
     ):
 
-        ranking = self.rank(
+        return self.rank(
             score
-        )
-
-        return ranking[:k]
+        )[:k]
 
     ##########################################################
 
@@ -160,40 +184,3 @@ class CarrierScore:
             score.max().item(),
 
         }
-
-
-def main():
-
-    quality = torch.rand(50000)
-
-    confidence = torch.rand(50000)
-
-    margin = torch.rand(50000)
-
-    scorer = CarrierScore()
-
-    score = scorer.compute(
-
-        quality,
-
-        confidence,
-
-        margin,
-
-    )
-
-    print()
-
-    print(
-
-        scorer.statistics(
-
-            score
-
-        )
-
-    )
-
-
-if __name__ == "__main__":
-    main()

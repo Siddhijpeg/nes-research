@@ -43,6 +43,12 @@ from src.carrier_intelligence.selector import (
     CarrierSelector,
 )
 
+from src.carrier_intelligence.layer_importance import LayerImportance
+
+from src.carrier_intelligence.carrier_reliability import CarrierReliability
+
+from src.carrier_intelligence.feature_normalizer import FeatureNormalizer
+from src.carrier_intelligence.local_entropy import LocalEntropyEstimator
 
 class IntelligentEmbedder:
     """
@@ -134,6 +140,22 @@ class IntelligentEmbedder:
             CarrierSelector()
         )
 
+        self.layer_importance = LayerImportance()
+
+        self.reliability = CarrierReliability()
+
+        self.feature_extractor = CarrierFeatureExtractor()
+        self.feature_normalizer = FeatureNormalizer()
+        self.carrier_score = CarrierScore()
+
+        self.quality_score = QualityScore()
+
+        self.local_entropy = LocalEntropyEstimator()
+        self.layer_importance = LayerImportance()
+        self.reliability = CarrierReliability()
+
+        self.scheduler = CarrierScheduler()
+
     ##################################################################
     # PRIVATE HELPERS
     ##################################################################
@@ -219,47 +241,141 @@ class IntelligentEmbedder:
 
         residual,
 
-        fp16,
+        fp16_weight,
 
-        nf4,
+        quantized_weight,
 
     ):
 
-        features = self.extractor.extract(
-
+        features = self.feature_extractor.extract(
             residual,
-
-            fp16,
-
-            nf4,
-
+            fp16_weight,
+            quantized_weight,
         )
 
-        quality = self.quality.compute(
-            features
-        )
+        ##########################################################
+        # Additional Feature Columns
+        ##########################################################
 
-        quality = quality.reshape(
-            residual.shape
-        )
+        quality = self.quality.compute(features)
 
-        margins = self.margin.compute(
+        quality = quality.reshape(residual.shape)
+
+        print("Residual shape :", residual.shape)
+        print("Quality shape  :", quality.shape)
+
+        margin = self.margin.compute(
             residual,
             quality,
         )
+
+        print("Margin shape   :", margin.shape)
 
         confidence = self.confidence.compute(
             residual,
-            margins,
+            margin,
         )
+
+        ##########################################################
+        # Append Features
+        ##########################################################
+
+        features = torch.cat(
+            [
+                features,
+                quality.reshape(-1, 1),
+                margin.reshape(-1, 1),
+                confidence.reshape(-1, 1),
+            ],
+            dim=1,
+        )
+        ##########################################################
+        # Local Entropy Feature
+        ##########################################################
+
+        entropy = self.local_entropy.compute(
+            residual
+        )
+
+        features = torch.cat(
+
+            [
+
+                features,
+
+                entropy.reshape(-1, 1),
+
+            ],
+
+            dim=1,
+
+        )
+
+        ##########################################################
+        # Layer Importance Feature
+        ##########################################################
+
+        importance = self.layer_importance.compute(
+            fp16_weight
+        )
+
+        features = torch.cat(
+
+            [
+
+                features,
+
+                importance.reshape(-1, 1),
+
+            ],
+
+            dim=1,
+
+        )
+
+        ##########################################################
+        # Carrier Reliability
+        ##########################################################
+
+        reliability = self.reliability.compute(
+            features
+        )
+
+        features = torch.cat(
+
+            [
+
+                features,
+
+                reliability.reshape(-1,1),
+
+            ],
+
+            dim=1,
+
+        )
+
+        ##########################################################
+        # Normalize
+        ##########################################################
+
+        features = self.feature_normalizer.normalize(
+            features
+        )
+
+        ##########################################################
+        # Carrier Utility Estimator
+        ##########################################################
 
         score = self.carrier_score.compute(
-            quality,
-            confidence,
-            margins,
+            features
         )
 
-        return score, quality, confidence, margins
+        score = score.reshape(
+            residual.shape
+        )
+
+        return score, quality, confidence, margin
 
     def _profile_layers(
         self,
