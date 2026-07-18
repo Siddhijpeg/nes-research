@@ -1,0 +1,202 @@
+tensor_id,layer_name,layer_type,shape,dtype,num_parameters,parameter_percentage,requires_grad,quantized
+0,model.embed_tokens.weight,Embedding,"(32000, 2048)",torch.bfloat16,65536000,10.645765480440069,True,False
+1,model.layers.0.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+2,model.layers.0.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+3,model.layers.0.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+4,model.layers.0.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+5,model.layers.0.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+6,model.layers.0.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+7,model.layers.0.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+8,model.layers.0.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+9,model.layers.0.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+10,model.layers.1.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+11,model.layers.1.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+12,model.layers.1.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+13,model.layers.1.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+14,model.layers.1.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+15,model.layers.1.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+16,model.layers.1.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+17,model.layers.1.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+18,model.layers.1.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+19,model.layers.2.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+20,model.layers.2.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+21,model.layers.2.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+22,model.layers.2.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+23,model.layers.2.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+24,model.layers.2.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+25,model.layers.2.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+26,model.layers.2.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+27,model.layers.2.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+28,model.layers.3.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+29,model.layers.3.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+30,model.layers.3.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+31,model.layers.3.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+32,model.layers.3.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+33,model.layers.3.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+34,model.layers.3.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+35,model.layers.3.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+36,model.layers.3.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+37,model.layers.4.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+38,model.layers.4.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+39,model.layers.4.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+40,model.layers.4.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+41,model.layers.4.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+42,model.layers.4.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+43,model.layers.4.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+44,model.layers.4.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+45,model.layers.4.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+46,model.layers.5.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+47,model.layers.5.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+48,model.layers.5.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+49,model.layers.5.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+50,model.layers.5.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+51,model.layers.5.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+52,model.layers.5.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+53,model.layers.5.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+54,model.layers.5.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+55,model.layers.6.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+56,model.layers.6.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+57,model.layers.6.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+58,model.layers.6.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+59,model.layers.6.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+60,model.layers.6.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+61,model.layers.6.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+62,model.layers.6.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+63,model.layers.6.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+64,model.layers.7.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+65,model.layers.7.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+66,model.layers.7.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+67,model.layers.7.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+68,model.layers.7.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+69,model.layers.7.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+70,model.layers.7.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+71,model.layers.7.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+72,model.layers.7.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+73,model.layers.8.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+74,model.layers.8.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+75,model.layers.8.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+76,model.layers.8.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+77,model.layers.8.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+78,model.layers.8.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+79,model.layers.8.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+80,model.layers.8.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+81,model.layers.8.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+82,model.layers.9.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+83,model.layers.9.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+84,model.layers.9.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+85,model.layers.9.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+86,model.layers.9.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+87,model.layers.9.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+88,model.layers.9.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+89,model.layers.9.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+90,model.layers.9.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+91,model.layers.10.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+92,model.layers.10.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+93,model.layers.10.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+94,model.layers.10.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+95,model.layers.10.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+96,model.layers.10.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+97,model.layers.10.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+98,model.layers.10.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+99,model.layers.10.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+100,model.layers.11.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+101,model.layers.11.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+102,model.layers.11.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+103,model.layers.11.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+104,model.layers.11.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+105,model.layers.11.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+106,model.layers.11.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+107,model.layers.11.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+108,model.layers.11.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+109,model.layers.12.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+110,model.layers.12.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+111,model.layers.12.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+112,model.layers.12.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+113,model.layers.12.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+114,model.layers.12.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+115,model.layers.12.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+116,model.layers.12.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+117,model.layers.12.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+118,model.layers.13.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+119,model.layers.13.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+120,model.layers.13.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+121,model.layers.13.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+122,model.layers.13.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+123,model.layers.13.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+124,model.layers.13.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+125,model.layers.13.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+126,model.layers.13.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+127,model.layers.14.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+128,model.layers.14.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+129,model.layers.14.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+130,model.layers.14.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+131,model.layers.14.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+132,model.layers.14.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+133,model.layers.14.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+134,model.layers.14.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+135,model.layers.14.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+136,model.layers.15.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+137,model.layers.15.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+138,model.layers.15.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+139,model.layers.15.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+140,model.layers.15.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+141,model.layers.15.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+142,model.layers.15.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+143,model.layers.15.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+144,model.layers.15.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+145,model.layers.16.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+146,model.layers.16.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+147,model.layers.16.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+148,model.layers.16.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+149,model.layers.16.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+150,model.layers.16.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+151,model.layers.16.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+152,model.layers.16.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+153,model.layers.16.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+154,model.layers.17.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+155,model.layers.17.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+156,model.layers.17.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+157,model.layers.17.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+158,model.layers.17.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+159,model.layers.17.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+160,model.layers.17.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+161,model.layers.17.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+162,model.layers.17.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+163,model.layers.18.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+164,model.layers.18.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+165,model.layers.18.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+166,model.layers.18.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+167,model.layers.18.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+168,model.layers.18.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+169,model.layers.18.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+170,model.layers.18.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+171,model.layers.18.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+172,model.layers.19.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+173,model.layers.19.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+174,model.layers.19.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+175,model.layers.19.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+176,model.layers.19.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+177,model.layers.19.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+178,model.layers.19.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+179,model.layers.19.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+180,model.layers.19.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+181,model.layers.20.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+182,model.layers.20.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+183,model.layers.20.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+184,model.layers.20.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+185,model.layers.20.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+186,model.layers.20.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+187,model.layers.20.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+188,model.layers.20.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+189,model.layers.20.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+190,model.layers.21.self_attn.q_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+191,model.layers.21.self_attn.k_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+192,model.layers.21.self_attn.v_proj.weight,Attention,"(262144, 1)",torch.uint8,262144,0.04258306192176028,False,True
+193,model.layers.21.self_attn.o_proj.weight,Attention,"(2097152, 1)",torch.uint8,2097152,0.3406644953740822,False,True
+194,model.layers.21.mlp.gate_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+195,model.layers.21.mlp.up_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+196,model.layers.21.mlp.down_proj.weight,MLP,"(5767168, 1)",torch.uint8,5767168,0.9368273622787261,False,True
+197,model.layers.21.input_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+198,model.layers.21.post_attention_layernorm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+199,model.norm.weight,Normalization,"(2048,)",torch.bfloat16,2048,0.00033268017126375217,True,False
+200,lm_head.weight,LM Head,"(32000, 2048)",torch.bfloat16,65536000,10.645765480440069,True,False

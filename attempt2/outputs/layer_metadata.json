@@ -1,0 +1,2771 @@
+[
+    {
+        "tensor_id": 0,
+        "layer_name": "model.embed_tokens.weight",
+        "layer_type": "Embedding",
+        "shape": [
+            32000,
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 65536000,
+        "parameter_percentage": 10.645765480440069,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 1,
+        "layer_name": "model.layers.0.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 2,
+        "layer_name": "model.layers.0.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 3,
+        "layer_name": "model.layers.0.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 4,
+        "layer_name": "model.layers.0.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 5,
+        "layer_name": "model.layers.0.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 6,
+        "layer_name": "model.layers.0.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 7,
+        "layer_name": "model.layers.0.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 8,
+        "layer_name": "model.layers.0.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 9,
+        "layer_name": "model.layers.0.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 10,
+        "layer_name": "model.layers.1.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 11,
+        "layer_name": "model.layers.1.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 12,
+        "layer_name": "model.layers.1.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 13,
+        "layer_name": "model.layers.1.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 14,
+        "layer_name": "model.layers.1.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 15,
+        "layer_name": "model.layers.1.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 16,
+        "layer_name": "model.layers.1.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 17,
+        "layer_name": "model.layers.1.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 18,
+        "layer_name": "model.layers.1.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 19,
+        "layer_name": "model.layers.2.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 20,
+        "layer_name": "model.layers.2.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 21,
+        "layer_name": "model.layers.2.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 22,
+        "layer_name": "model.layers.2.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 23,
+        "layer_name": "model.layers.2.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 24,
+        "layer_name": "model.layers.2.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 25,
+        "layer_name": "model.layers.2.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 26,
+        "layer_name": "model.layers.2.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 27,
+        "layer_name": "model.layers.2.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 28,
+        "layer_name": "model.layers.3.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 29,
+        "layer_name": "model.layers.3.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 30,
+        "layer_name": "model.layers.3.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 31,
+        "layer_name": "model.layers.3.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 32,
+        "layer_name": "model.layers.3.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 33,
+        "layer_name": "model.layers.3.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 34,
+        "layer_name": "model.layers.3.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 35,
+        "layer_name": "model.layers.3.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 36,
+        "layer_name": "model.layers.3.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 37,
+        "layer_name": "model.layers.4.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 38,
+        "layer_name": "model.layers.4.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 39,
+        "layer_name": "model.layers.4.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 40,
+        "layer_name": "model.layers.4.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 41,
+        "layer_name": "model.layers.4.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 42,
+        "layer_name": "model.layers.4.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 43,
+        "layer_name": "model.layers.4.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 44,
+        "layer_name": "model.layers.4.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 45,
+        "layer_name": "model.layers.4.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 46,
+        "layer_name": "model.layers.5.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 47,
+        "layer_name": "model.layers.5.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 48,
+        "layer_name": "model.layers.5.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 49,
+        "layer_name": "model.layers.5.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 50,
+        "layer_name": "model.layers.5.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 51,
+        "layer_name": "model.layers.5.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 52,
+        "layer_name": "model.layers.5.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 53,
+        "layer_name": "model.layers.5.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 54,
+        "layer_name": "model.layers.5.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 55,
+        "layer_name": "model.layers.6.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 56,
+        "layer_name": "model.layers.6.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 57,
+        "layer_name": "model.layers.6.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 58,
+        "layer_name": "model.layers.6.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 59,
+        "layer_name": "model.layers.6.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 60,
+        "layer_name": "model.layers.6.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 61,
+        "layer_name": "model.layers.6.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 62,
+        "layer_name": "model.layers.6.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 63,
+        "layer_name": "model.layers.6.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 64,
+        "layer_name": "model.layers.7.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 65,
+        "layer_name": "model.layers.7.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 66,
+        "layer_name": "model.layers.7.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 67,
+        "layer_name": "model.layers.7.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 68,
+        "layer_name": "model.layers.7.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 69,
+        "layer_name": "model.layers.7.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 70,
+        "layer_name": "model.layers.7.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 71,
+        "layer_name": "model.layers.7.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 72,
+        "layer_name": "model.layers.7.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 73,
+        "layer_name": "model.layers.8.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 74,
+        "layer_name": "model.layers.8.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 75,
+        "layer_name": "model.layers.8.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 76,
+        "layer_name": "model.layers.8.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 77,
+        "layer_name": "model.layers.8.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 78,
+        "layer_name": "model.layers.8.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 79,
+        "layer_name": "model.layers.8.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 80,
+        "layer_name": "model.layers.8.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 81,
+        "layer_name": "model.layers.8.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 82,
+        "layer_name": "model.layers.9.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 83,
+        "layer_name": "model.layers.9.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 84,
+        "layer_name": "model.layers.9.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 85,
+        "layer_name": "model.layers.9.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 86,
+        "layer_name": "model.layers.9.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 87,
+        "layer_name": "model.layers.9.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 88,
+        "layer_name": "model.layers.9.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 89,
+        "layer_name": "model.layers.9.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 90,
+        "layer_name": "model.layers.9.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 91,
+        "layer_name": "model.layers.10.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 92,
+        "layer_name": "model.layers.10.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 93,
+        "layer_name": "model.layers.10.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 94,
+        "layer_name": "model.layers.10.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 95,
+        "layer_name": "model.layers.10.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 96,
+        "layer_name": "model.layers.10.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 97,
+        "layer_name": "model.layers.10.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 98,
+        "layer_name": "model.layers.10.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 99,
+        "layer_name": "model.layers.10.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 100,
+        "layer_name": "model.layers.11.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 101,
+        "layer_name": "model.layers.11.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 102,
+        "layer_name": "model.layers.11.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 103,
+        "layer_name": "model.layers.11.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 104,
+        "layer_name": "model.layers.11.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 105,
+        "layer_name": "model.layers.11.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 106,
+        "layer_name": "model.layers.11.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 107,
+        "layer_name": "model.layers.11.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 108,
+        "layer_name": "model.layers.11.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 109,
+        "layer_name": "model.layers.12.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 110,
+        "layer_name": "model.layers.12.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 111,
+        "layer_name": "model.layers.12.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 112,
+        "layer_name": "model.layers.12.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 113,
+        "layer_name": "model.layers.12.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 114,
+        "layer_name": "model.layers.12.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 115,
+        "layer_name": "model.layers.12.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 116,
+        "layer_name": "model.layers.12.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 117,
+        "layer_name": "model.layers.12.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 118,
+        "layer_name": "model.layers.13.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 119,
+        "layer_name": "model.layers.13.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 120,
+        "layer_name": "model.layers.13.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 121,
+        "layer_name": "model.layers.13.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 122,
+        "layer_name": "model.layers.13.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 123,
+        "layer_name": "model.layers.13.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 124,
+        "layer_name": "model.layers.13.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 125,
+        "layer_name": "model.layers.13.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 126,
+        "layer_name": "model.layers.13.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 127,
+        "layer_name": "model.layers.14.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 128,
+        "layer_name": "model.layers.14.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 129,
+        "layer_name": "model.layers.14.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 130,
+        "layer_name": "model.layers.14.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 131,
+        "layer_name": "model.layers.14.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 132,
+        "layer_name": "model.layers.14.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 133,
+        "layer_name": "model.layers.14.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 134,
+        "layer_name": "model.layers.14.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 135,
+        "layer_name": "model.layers.14.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 136,
+        "layer_name": "model.layers.15.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 137,
+        "layer_name": "model.layers.15.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 138,
+        "layer_name": "model.layers.15.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 139,
+        "layer_name": "model.layers.15.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 140,
+        "layer_name": "model.layers.15.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 141,
+        "layer_name": "model.layers.15.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 142,
+        "layer_name": "model.layers.15.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 143,
+        "layer_name": "model.layers.15.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 144,
+        "layer_name": "model.layers.15.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 145,
+        "layer_name": "model.layers.16.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 146,
+        "layer_name": "model.layers.16.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 147,
+        "layer_name": "model.layers.16.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 148,
+        "layer_name": "model.layers.16.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 149,
+        "layer_name": "model.layers.16.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 150,
+        "layer_name": "model.layers.16.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 151,
+        "layer_name": "model.layers.16.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 152,
+        "layer_name": "model.layers.16.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 153,
+        "layer_name": "model.layers.16.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 154,
+        "layer_name": "model.layers.17.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 155,
+        "layer_name": "model.layers.17.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 156,
+        "layer_name": "model.layers.17.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 157,
+        "layer_name": "model.layers.17.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 158,
+        "layer_name": "model.layers.17.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 159,
+        "layer_name": "model.layers.17.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 160,
+        "layer_name": "model.layers.17.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 161,
+        "layer_name": "model.layers.17.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 162,
+        "layer_name": "model.layers.17.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 163,
+        "layer_name": "model.layers.18.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 164,
+        "layer_name": "model.layers.18.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 165,
+        "layer_name": "model.layers.18.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 166,
+        "layer_name": "model.layers.18.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 167,
+        "layer_name": "model.layers.18.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 168,
+        "layer_name": "model.layers.18.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 169,
+        "layer_name": "model.layers.18.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 170,
+        "layer_name": "model.layers.18.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 171,
+        "layer_name": "model.layers.18.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 172,
+        "layer_name": "model.layers.19.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 173,
+        "layer_name": "model.layers.19.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 174,
+        "layer_name": "model.layers.19.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 175,
+        "layer_name": "model.layers.19.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 176,
+        "layer_name": "model.layers.19.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 177,
+        "layer_name": "model.layers.19.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 178,
+        "layer_name": "model.layers.19.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 179,
+        "layer_name": "model.layers.19.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 180,
+        "layer_name": "model.layers.19.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 181,
+        "layer_name": "model.layers.20.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 182,
+        "layer_name": "model.layers.20.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 183,
+        "layer_name": "model.layers.20.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 184,
+        "layer_name": "model.layers.20.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 185,
+        "layer_name": "model.layers.20.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 186,
+        "layer_name": "model.layers.20.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 187,
+        "layer_name": "model.layers.20.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 188,
+        "layer_name": "model.layers.20.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 189,
+        "layer_name": "model.layers.20.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 190,
+        "layer_name": "model.layers.21.self_attn.q_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 191,
+        "layer_name": "model.layers.21.self_attn.k_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 192,
+        "layer_name": "model.layers.21.self_attn.v_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            262144,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 262144,
+        "parameter_percentage": 0.04258306192176028,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 193,
+        "layer_name": "model.layers.21.self_attn.o_proj.weight",
+        "layer_type": "Attention",
+        "shape": [
+            2097152,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 2097152,
+        "parameter_percentage": 0.3406644953740822,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 194,
+        "layer_name": "model.layers.21.mlp.gate_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 195,
+        "layer_name": "model.layers.21.mlp.up_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 196,
+        "layer_name": "model.layers.21.mlp.down_proj.weight",
+        "layer_type": "MLP",
+        "shape": [
+            5767168,
+            1
+        ],
+        "dtype": "torch.uint8",
+        "num_parameters": 5767168,
+        "parameter_percentage": 0.9368273622787261,
+        "requires_grad": false,
+        "quantized": true
+    },
+    {
+        "tensor_id": 197,
+        "layer_name": "model.layers.21.input_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 198,
+        "layer_name": "model.layers.21.post_attention_layernorm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 199,
+        "layer_name": "model.norm.weight",
+        "layer_type": "Normalization",
+        "shape": [
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 2048,
+        "parameter_percentage": 0.00033268017126375217,
+        "requires_grad": true,
+        "quantized": false
+    },
+    {
+        "tensor_id": 200,
+        "layer_name": "lm_head.weight",
+        "layer_type": "LM Head",
+        "shape": [
+            32000,
+            2048
+        ],
+        "dtype": "torch.bfloat16",
+        "num_parameters": 65536000,
+        "parameter_percentage": 10.645765480440069,
+        "requires_grad": true,
+        "quantized": false
+    }
+]
