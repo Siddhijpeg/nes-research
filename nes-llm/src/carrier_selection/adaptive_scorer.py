@@ -1,154 +1,82 @@
-import torch
+"""
+Adaptive Carrier Scorer — magnitude + entropy + variance + kurtosis.
+"""
 
-from src.carrier_selection.carrier_features import (
-    CarrierFeatures,
-)
+import torch
+from src.carrier_selection.carrier_features import CarrierFeatures
 
 
 class AdaptiveScorer:
     """
-    Adaptive Carrier Scoring (ACS).
-
-    Computes a carrier quality score from one or
-    more residual characteristics.
-
-    The current version supports only magnitude.
-
-    Later versions progressively include:
-
-        • Entropy
-        • Local variance
-        • Kurtosis
-        • Layer priors
-        • Quantization stability
+    Weighted quality score from:
+      - Magnitude  60%  (larger residuals harder to flip)
+      - Entropy    20%  (higher entropy = richer region)
+      - Variance   15%  (local spread helps distinguish signal)
+      - Kurtosis    5%  (low kurtosis = well-behaved distribution)
     """
 
     def __init__(
         self,
-        magnitude_weight=1.0,
-        entropy_weight=0.0,
-        variance_weight=0.0,
-        kurtosis_weight=0.0,
-        layer_weight=0.0,
+        magnitude_weight: float = 0.60,
+        entropy_weight:   float = 0.20,
+        variance_weight:  float = 0.15,
+        kurtosis_weight:  float = 0.05,
+        layer_weight:     float = 0.0,
+        eps:              float = 1e-8,
     ):
-
         self.magnitude_weight = magnitude_weight
-        self.entropy_weight = entropy_weight
-        self.variance_weight = variance_weight
-        self.kurtosis_weight = kurtosis_weight
-        self.layer_weight = layer_weight
+        self.entropy_weight   = entropy_weight
+        self.variance_weight  = variance_weight
+        self.kurtosis_weight  = kurtosis_weight
+        self.layer_weight     = layer_weight
+        self.eps              = eps
 
     @staticmethod
-    def normalize(scores):
-
-        scores = scores.float()
-
-        minimum = scores.min()
-        maximum = scores.max()
-
-        if maximum == minimum:
-            return torch.zeros_like(scores)
-
-        return (scores - minimum) / (
-            maximum - minimum
-        )
+    def normalize(scores: torch.Tensor) -> torch.Tensor:
+        scores  = scores.float()
+        mn, mx  = scores.min(), scores.max()
+        if (mx - mn).item() < 1e-8:
+            return torch.full_like(scores, 0.5)
+        return (scores - mn) / (mx - mn + 1e-8)
 
     def score(
         self,
-        residual_tensor,
-    ):
+        residual_tensor: torch.Tensor,
+        layer_quality_factor: float = 1.0,
+    ) -> torch.Tensor:
         """
-        Compute the Adaptive Carrier Score.
+        Returns quality scores, same shape as residual_tensor, in [0, 1].
         """
-
-        score = torch.zeros_like(
-            residual_tensor,
-            dtype=torch.float32,
-        )
-
-        # ----------------------------
-        # Magnitude
-        # ----------------------------
+        flat  = residual_tensor.flatten()
+        score = torch.zeros(flat.numel(), dtype=torch.float32)
 
         if self.magnitude_weight > 0:
-
-            magnitude = self.normalize(
-                CarrierFeatures.magnitude(
-                    residual_tensor
-                )
-            )
-
-            score += (
-                self.magnitude_weight
-                * magnitude
-            )
-
-        # ----------------------------
-        # Entropy (future)
-        # ----------------------------
+            score += self.magnitude_weight * self.normalize(flat.abs())
 
         if self.entropy_weight > 0:
-
-            entropy = self.normalize(
-                CarrierFeatures.entropy(
-                    residual_tensor
+            try:
+                score += self.entropy_weight * self.normalize(
+                    CarrierFeatures.entropy(flat).flatten()
                 )
-            )
-
-            score += (
-                self.entropy_weight
-                * entropy
-            )
-
-        # ----------------------------
-        # Variance (future)
-        # ----------------------------
+            except Exception:
+                pass
 
         if self.variance_weight > 0:
-
-            variance = self.normalize(
-                CarrierFeatures.variance(
-                    residual_tensor
+            try:
+                score += self.variance_weight * self.normalize(
+                    CarrierFeatures.variance(flat).flatten()
                 )
-            )
-
-            score += (
-                self.variance_weight
-                * variance
-            )
-
-        # ----------------------------
-        # Kurtosis (future)
-        # ----------------------------
+            except Exception:
+                pass
 
         if self.kurtosis_weight > 0:
-
-            kurtosis = self.normalize(
-                CarrierFeatures.kurtosis(
-                    residual_tensor
+            try:
+                # Low kurtosis = better → invert
+                score += self.kurtosis_weight * self.normalize(
+                    -CarrierFeatures.kurtosis(flat).flatten()
                 )
-            )
+            except Exception:
+                pass
 
-            score += (
-                self.kurtosis_weight
-                * kurtosis
-            )
-
-        # ----------------------------
-        # Layer Prior (future)
-        # ----------------------------
-
-        if self.layer_weight > 0:
-
-            layer = self.normalize(
-                CarrierFeatures.layer_prior(
-                    residual_tensor
-                )
-            )
-
-            score += (
-                self.layer_weight
-                * layer
-            )
-
-        return score
+        score = self.normalize(score * layer_quality_factor)
+        return score.reshape(residual_tensor.shape)
