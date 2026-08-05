@@ -1,25 +1,27 @@
 """
-NES Real Model Pipeline — full end-to-end on a quantized LLM.
+NES Real Model Pipeline — correct implementation using true residuals.
 
-Usage:
-    pipeline = NESRealPipeline(model_id="meta-llama/Llama-3-8B")
-    result   = pipeline.embed("secret message", hf_token="hf_...")
-    pipeline.save("embedded_model/")
+Pipeline:
+    Load float16 model
+        → Extract true residuals R = W_fp16 - W_nf4_dequant
+        → Embed bits into R → R_embedded
+        → Patch: W_new = W_nf4_dequant + R_embedded
+        → Save / evaluate
 
-    # To extract later:
-    pipeline2 = NESRealPipeline(model_id="meta-llama/Llama-3-8B")
-    message   = pipeline2.extract("embedded_model/", key, carrier_map)
+Extract:
+    Load embedded float16 model
+        → Re-extract residuals from embedded weights
+        → Run DecryptPipeline
 """
 
-import json
-import os
+import json, os, secrets
 from typing import Dict, List, Optional, Tuple
 
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.model.model_loader       import ModelLoader, LLAMA_TARGET_MODULES
-from src.model.residual_extractor import ResidualExtractor
-from src.model.weight_patcher     import WeightPatcher
+from src.model.residual_extractor   import ResidualExtractor, LLAMA_TARGET_MODULES
+from src.model.weight_patcher       import WeightPatcher
 from src.embedding.intelligent_embedder import IntelligentEmbedder
 from src.extraction.decrypt_pipeline    import DecryptPipeline
 from src.crypto.key_manager             import KeyManager
@@ -27,22 +29,7 @@ from src.core.types                     import EmbeddingConfig
 
 
 class NESRealPipeline:
-    """
-    Full NES pipeline operating on a real quantized LLM.
-
-    Steps (embed):
-        1. Load model in NF4 (BitsAndBytes)
-        2. Extract dequantized residuals from target layers
-        3. Run IntelligentEmbedder (QACI + sign embedding)
-        4. Patch embedded weights back into model
-        5. Save model + key + carrier map
-
-    Steps (extract):
-        1. Load embedded model in NF4
-        2. Extract residuals from same target layers
-        3. Run DecryptPipeline (sign extraction + AES decrypt)
-        4. Return plaintext message
-    """
+    """Full NES pipeline on a real float16 LLM."""
 
     def __init__(
         self,
@@ -57,21 +44,27 @@ class NESRealPipeline:
         self.layer_range    = layer_range
         self.payload_bits   = payload_bits
         self.cache_dir      = cache_dir
+        self.patcher        = WeightPatcher()
+        self.km             = KeyManager()
 
-        self.loader    = ModelLoader()
-        self.extractor = ResidualExtractor(
-            target_modules=self.target_modules,
-            layer_range=   self.layer_range,
+    def _load_model(self, model_id: str, token: str = None):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_id, cache_dir=self.cache_dir, token=token
         )
-        self.patcher   = WeightPatcher()
-        self.km        = KeyManager()
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
 
-        self._model     = None
-        self._tokenizer = None
-
-    # ------------------------------------------------------------------
-    # Embed
-    # ------------------------------------------------------------------
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            dtype=torch.float16,
+            device_map="auto",
+            cache_dir=self.cache_dir,
+            token=token,
+        )
+        model.eval()
+        print(f"[NESPipeline] Loaded {model_id} "
+              f"(device={next(model.parameters()).device})")
+        return model, tokenizer
 
     def embed(
         self,
@@ -80,59 +73,45 @@ class NESRealPipeline:
         output_dir: Optional[str] = None,
     ) -> dict:
         """
-        Embed message into model and optionally save.
+        Embed message into model using true NF4 residuals.
 
-        Returns:
-            {
-                "key":            bytes,
-                "key_id":         str,
-                "carrier_indices":{layer_id: [indices]},
-                "module_names":   {layer_id: str},
-                "bits_embedded":  int,
-                "output_dir":     str or None,
-            }
+        Returns dict with key, carrier_indices, module_names, etc.
         """
-        # Load model
-        model, tokenizer = self.loader.load(
-            self.model_id,
-            cache_dir=self.cache_dir,
-            token=hf_token,
-        )
-        self._model     = model
-        self._tokenizer = tokenizer
+        model, tokenizer = self._load_model(self.model_id, hf_token)
 
-        # Extract residuals
-        residuals, fp16_weights, module_names = self.extractor.extract(model)
+        extractor = ResidualExtractor(self.target_modules, self.layer_range)
+        residuals, nf4_dequant, module_refs, module_names = extractor.extract(model)
 
         total_capacity = sum(t.numel() for t in residuals.values())
-        print(f"[NESPipeline] Total carrier capacity: {total_capacity:,} positions")
+        print(f"[NESPipeline] Capacity: {total_capacity:,} carrier positions")
 
-        # Embed
         config   = EmbeddingConfig(
             total_payload_bits=min(self.payload_bits, total_capacity),
             embedding_strategy="sign",
         )
         embedder = IntelligentEmbedder(config)
-        result   = embedder.embed(
-            message,
-            residuals,
-            fp16_weights=     fp16_weights,
-            quantized_weights=fp16_weights,
-        )
+        result   = embedder.embed(message, residuals)
 
-        print(f"[NESPipeline] Embedded {result.bits_embedded:,} bits across "
-              f"{sum(1 for b in result.layer_allocation.values() if b>0)} layers")
+        print(f"[NESPipeline] Embedded {result.bits_embedded:,} bits "
+              f"across {sum(1 for b in result.layer_allocation.values() if b>0)} layers")
 
-        # Patch model
-        self.patcher.patch(model, result.embedded_residuals, module_names)
+        # Patch: W_new = W_nf4_dequant + R_embedded
+        self.patcher.patch(module_refs, nf4_dequant, result.embedded_residuals)
 
-        # Store key
         kid = self.km.add_key(result.key, model_id=self.model_id)
 
-        # Save
         if output_dir:
-            self._save(model, tokenizer, kid, result.carrier_indices,
-                       module_names, output_dir)
+            os.makedirs(output_dir, exist_ok=True)
+            model.save_pretrained(output_dir)
+            tokenizer.save_pretrained(output_dir)
+            self.km.save(os.path.join(output_dir, "nes_keys.json"))
+            with open(os.path.join(output_dir, "nes_carriers.json"), "w") as f:
+                json.dump({
+                    "key_id":          kid,
+                    "carrier_indices": {str(k): v for k, v in result.carrier_indices.items()},
+                    "module_names":    {str(k): v for k, v in module_names.items()},
+                }, f, indent=2)
+            print(f"[NESPipeline] Saved to {output_dir}/")
 
         return {
             "key":             result.key,
@@ -143,10 +122,6 @@ class NESRealPipeline:
             "output_dir":      output_dir,
         }
 
-    # ------------------------------------------------------------------
-    # Extract
-    # ------------------------------------------------------------------
-
     def extract(
         self,
         model_dir:       str,
@@ -154,64 +129,17 @@ class NESRealPipeline:
         carrier_indices: Dict[int, List[int]],
         hf_token:        Optional[str] = None,
     ) -> str:
-        """
-        Extract message from embedded model.
+        """Extract message from embedded float16 model."""
+        model, _ = self._load_model(model_dir, hf_token)
 
-        Args:
-            model_dir:       Path to saved embedded model.
-            key:             32-byte AES key.
-            carrier_indices: {layer_id: [flat_indices]}
+        extractor = ResidualExtractor(self.target_modules, self.layer_range)
+        residuals, _, _, _ = extractor.extract(model)
 
-        Returns:
-            Recovered plaintext message.
-        """
-        model, tokenizer = self.loader.load(
-            model_dir,
-            cache_dir=self.cache_dir,
-            token=hf_token,
-        )
-
-        residuals, _, _ = self.extractor.extract(model)
-        pipeline        = DecryptPipeline(key=key)
-        message, stats  = pipeline.run(residuals, carrier_indices)
+        pipeline = DecryptPipeline(key=key)
+        message, stats = pipeline.run(residuals, carrier_indices)
 
         if not stats.get("success"):
             raise RuntimeError(f"Extraction failed: {stats.get('error')}")
 
-        print(f"[NESPipeline] Extracted message ({len(message)} chars)")
+        print(f"[NESPipeline] Recovered message ({len(message)} chars)")
         return message
-
-    # ------------------------------------------------------------------
-    # Save / Load helpers
-    # ------------------------------------------------------------------
-
-    def _save(
-        self,
-        model,
-        tokenizer,
-        key_id:          str,
-        carrier_indices: Dict[int, List[int]],
-        module_names:    Dict[int, str],
-        output_dir:      str,
-    ):
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Save model + tokenizer
-        model.save_pretrained(output_dir)
-        tokenizer.save_pretrained(output_dir)
-
-        # Save key
-        self.km.save(os.path.join(output_dir, "nes_keys.json"))
-
-        # Save carrier map
-        with open(os.path.join(output_dir, "nes_carriers.json"), "w") as f:
-            json.dump({
-                "key_id":          key_id,
-                "carrier_indices": {str(k): v for k, v in carrier_indices.items()},
-                "module_names":    {str(k): v for k, v in module_names.items()},
-            }, f, indent=2)
-
-        print(f"[NESPipeline] Saved to {output_dir}/")
-        print(f"  Model     : {output_dir}/")
-        print(f"  Keys      : {output_dir}/nes_keys.json")
-        print(f"  Carriers  : {output_dir}/nes_carriers.json")

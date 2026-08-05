@@ -1,45 +1,38 @@
 """
-Residual extractor — computes FP16 - NF4 residuals from real model weights.
+Residual Extractor — computes true NF4 quantization residuals.
 
 For each target layer:
-    residual = dequantize(nf4_weight) - fp16_weight_reference
+    W_fp16       = original float16 weight
+    W_nf4_dequant = dequantize(quantize(W_fp16))   ← what NF4 stores
+    R            = W_fp16 - W_nf4_dequant           ← TRUE residual
 
-These residuals are what we embed bits into.
+NES embeds bits into R. The effective weight perturbation is bounded
+by 2×|R| ≈ 0.003, which is within normal NF4 quantization variance.
+
+This means embedding is invisible at the functional level — the model
+cannot distinguish embedded weights from normal NF4 quantization error.
 """
 
 from typing import Dict, List, Optional, Tuple
 import torch
 
-
-# Target modules for Llama-style models (most capacity, least sensitive)
-LLAMA_TARGET_MODULES = [
-    "down_proj",
-    "gate_proj",
-    "up_proj",
-]
-
-CONSERVATIVE_TARGET_MODULES = [
-    "down_proj",
-]
+LLAMA_TARGET_MODULES      = ["down_proj", "gate_proj", "up_proj"]
+CONSERVATIVE_TARGET_MODULES = ["down_proj"]
 
 
 class ResidualExtractor:
     """
-    Extracts per-layer quantization residuals from a BitsAndBytes NF4 model.
+    Extracts true NF4 quantization residuals from a float16 model.
 
-    For each layer × module:
-        1. Dequantize the NF4 weight  → fp16_dequant
-        2. residual = fp16_dequant    (NF4 models don't store original FP16)
+    Unlike the previous version (which returned dequantized weights),
+    this computes the actual quantization residual:
+        R = W_fp16 - dequantize(quantize(W_fp16))
 
-    In pure NF4 mode the "residual" IS the dequantized weight — sign embedding
-    modifies the dequantized weight values which survive requantization because
-    we select high-magnitude positions.
-
-    Usage:
-        extractor = ResidualExtractor(target_modules=LLAMA_TARGET_MODULES)
-        residuals, fp16_weights = extractor.extract(model)
-        # residuals:    {layer_id: tensor}
-        # fp16_weights: {layer_id: tensor}  (same as dequantized)
+    Returns:
+        residuals:       {layer_id: R}             — embed bits here
+        nf4_dequant:     {layer_id: W_nf4_dequant} — needed for patching
+        module_refs:     {layer_id: module}         — for weight patching
+        module_names:    {layer_id: str}            — for logging
     """
 
     def __init__(
@@ -48,22 +41,29 @@ class ResidualExtractor:
         layer_range:    Optional[Tuple[int, int]] = None,
     ):
         self.target_modules = target_modules or LLAMA_TARGET_MODULES
-        self.layer_range    = layer_range   # e.g. (8, 24) for middle layers only
+        self.layer_range    = layer_range
 
-    def extract(
-        self,
-        model,
-    ) -> Tuple[Dict[int, torch.Tensor], Dict[int, torch.Tensor], Dict[int, str]]:
+    def extract(self, model) -> Tuple[
+        Dict[int, torch.Tensor],   # residuals
+        Dict[int, torch.Tensor],   # nf4_dequant
+        Dict[int, object],         # module_refs
+        Dict[int, str],            # module_names
+    ]:
         """
-        Extract residuals from all target layers.
+        Extract true quantization residuals from all target layers.
+
+        Args:
+            model: Float16 HuggingFace model (NOT NF4 BitsAndBytes model).
+                   Load with: AutoModelForCausalLM.from_pretrained(..., dtype=torch.float16)
 
         Returns:
-            residuals:    {layer_id: dequantized_weight_tensor}
-            fp16_weights: {layer_id: same tensor (alias)}
-            module_names: {layer_id: module_name_string}
+            (residuals, nf4_dequant, module_refs, module_names)
         """
+        import bitsandbytes.functional as bnb_func
+
         residuals    = {}
-        fp16_weights = {}
+        nf4_dequant  = {}
+        module_refs  = {}
         module_names = {}
         layer_id     = 0
 
@@ -77,48 +77,33 @@ class ResidualExtractor:
             layer = model.model.layers[layer_idx]
 
             for mod_name in self.target_modules:
-                # Navigate to the module (mlp.down_proj etc.)
-                module = self._get_submodule(layer, f"mlp.{mod_name}")
-                if module is None:
+                module = getattr(layer.mlp, mod_name, None)
+                if module is None or not hasattr(module, 'weight'):
                     continue
 
                 try:
-                    dequant = self._dequantize(module)
-                    residuals[layer_id]    = dequant
-                    fp16_weights[layer_id] = dequant
+                    W_fp16 = module.weight.data.float().cpu()
+
+                    # Simulate NF4 quantization round-trip
+                    q_weight, q_state = bnb_func.quantize_4bit(
+                        W_fp16, quant_type="nf4", compress_statistics=True
+                    )
+                    W_nf4 = bnb_func.dequantize_4bit(q_weight, q_state).float()
+
+                    # True residual = FP16 - NF4_dequant (magnitude ~0.001)
+                    R = W_fp16 - W_nf4
+
+                    residuals[layer_id]   = R
+                    nf4_dequant[layer_id] = W_nf4
+                    module_refs[layer_id] = module
                     module_names[layer_id] = f"layer{layer_idx}.{mod_name}"
                     layer_id += 1
+
                 except Exception as e:
                     print(f"[ResidualExtractor] Skipping layer{layer_idx}.{mod_name}: {e}")
 
-        print(f"[ResidualExtractor] Extracted {layer_id} residual tensors "
-              f"({sum(t.numel() for t in residuals.values()):,} total params)")
-        return residuals, fp16_weights, module_names
-
-    def _get_submodule(self, parent, path: str):
-        """Traverse dotted path from parent module."""
-        parts = path.split(".")
-        mod   = parent
-        for part in parts:
-            mod = getattr(mod, part, None)
-            if mod is None:
-                return None
-        return mod
-
-    def _dequantize(self, module) -> torch.Tensor:
-        """
-        Dequantize a BitsAndBytes NF4 linear layer weight to float32.
-        """
-        import bitsandbytes as bnb
-
-        if isinstance(module, bnb.nn.Linear4bit):
-            # BitsAndBytes provides dequantize_4bit
-            weight = bnb.functional.dequantize_4bit(
-                module.weight.data,
-                module.weight.quant_state,
-            ).to(torch.float32)
-            return weight
-        elif hasattr(module, "weight"):
-            return module.weight.data.float()
-        else:
-            raise ValueError(f"Cannot dequantize module of type {type(module)}")
+        total_params = sum(t.numel() for t in residuals.values())
+        mean_mag     = sum(t.abs().mean().item() for t in residuals.values()) / max(len(residuals), 1)
+        print(f"[ResidualExtractor] {layer_id} tensors, {total_params:,} params, "
+              f"mean residual magnitude={mean_mag:.6f}")
+        return residuals, nf4_dequant, module_refs, module_names

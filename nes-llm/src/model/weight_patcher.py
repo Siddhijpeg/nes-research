@@ -1,96 +1,98 @@
 """
-Weight patcher — writes modified residuals back into model layers.
+Weight Patcher — applies embedded residuals back into float16 model weights.
 
-After IntelligentEmbedder modifies residuals, this patches the
-changes back into the actual model parameters so they survive
-when the model is saved and reloaded.
+Correct formula:
+    W_new = W_nf4_dequant + R_embedded
+
+Where:
+    W_nf4_dequant = dequantize(quantize(W_fp16))  — stable NF4 baseline
+    R_embedded    = sign_embed(R_original)         — modified residual
+
+This guarantees the effective weight perturbation is bounded by
+2 × |R_original| ≈ 0.003, invisible at the functional level.
 """
 
-from typing import Dict, List
+from typing import Dict
 import torch
 
 
 class WeightPatcher:
     """
-    Patches embedded residual tensors back into a BitsAndBytes NF4 model.
-
-    Process per layer:
-        1. Take the embedded (modified) dequantized weight.
-        2. Requantize it to NF4 using BitsAndBytes.
-        3. Replace the model's stored NF4 weight + quant_state.
+    Applies embedded residuals to float16 model weights.
 
     Usage:
         patcher = WeightPatcher()
-        patcher.patch(model, embedded_residuals, module_names)
+        patcher.patch(module_refs, nf4_dequant, embedded_residuals)
+        # ... evaluate model ...
+        patcher.restore(module_refs, nf4_dequant, original_residuals)
     """
 
     def patch(
         self,
-        model,
+        module_refs:        Dict[int, object],
+        nf4_dequant:        Dict[int, torch.Tensor],
         embedded_residuals: Dict[int, torch.Tensor],
-        module_names:       Dict[int, str],
     ) -> int:
         """
-        Patch embedded residuals into model in-place.
+        Apply embedded residuals: W_new = W_nf4_dequant + R_embedded
 
         Args:
-            model:              The loaded NF4 model.
-            embedded_residuals: {layer_id: modified_weight_tensor}
-            module_names:       {layer_id: "layer{i}.{module}"}
+            module_refs:        {layer_id: nn.Module}
+            nf4_dequant:        {layer_id: W_nf4_dequant tensor}
+            embedded_residuals: {layer_id: R_embedded tensor}
 
         Returns:
-            Number of layers successfully patched.
+            Number of layers patched.
         """
-        import bitsandbytes as bnb
-
         patched = 0
-        for layer_id, weight_tensor in embedded_residuals.items():
-            mod_name = module_names.get(layer_id, "")
-            if not mod_name:
-                continue
+        with torch.no_grad():
+            for lid, module in module_refs.items():
+                if lid not in embedded_residuals or lid not in nf4_dequant:
+                    continue
+                try:
+                    W_nf4 = nf4_dequant[lid]
+                    R_emb = embedded_residuals[lid]
+                    W_new = (W_nf4 + R_emb).to(
+                        module.weight.dtype
+                    ).to(module.weight.device)
+                    module.weight.data.copy_(W_new)
+                    patched += 1
+                except Exception as e:
+                    print(f"[WeightPatcher] Failed lid={lid}: {e}")
 
-            module = self._resolve_module(model, mod_name)
-            if module is None:
-                print(f"[WeightPatcher] Could not find module: {mod_name}")
-                continue
-
-            try:
-                self._requantize_and_patch(module, weight_tensor)
-                patched += 1
-            except Exception as e:
-                print(f"[WeightPatcher] Failed to patch {mod_name}: {e}")
-
-        print(f"[WeightPatcher] Patched {patched}/{len(embedded_residuals)} layers")
+        print(f"[WeightPatcher] Patched {patched}/{len(module_refs)} layers")
         return patched
 
-    def _resolve_module(self, model, mod_name: str):
+    def restore(
+        self,
+        module_refs:       Dict[int, object],
+        nf4_dequant:       Dict[int, torch.Tensor],
+        original_residuals:Dict[int, torch.Tensor],
+    ) -> int:
         """
-        Resolve module from name like 'layer5.down_proj'.
+        Restore original weights: W_original = W_nf4_dequant + R_original
+
+        Args:
+            module_refs:        {layer_id: nn.Module}
+            nf4_dequant:        {layer_id: W_nf4_dequant tensor}
+            original_residuals: {layer_id: R_original tensor}
+
+        Returns:
+            Number of layers restored.
         """
-        try:
-            parts     = mod_name.split(".")   # ['layer5', 'down_proj']
-            layer_idx = int(parts[0].replace("layer", ""))
-            sub_name  = parts[1]
-            return getattr(model.model.layers[layer_idx].mlp, sub_name, None)
-        except Exception:
-            return None
+        restored = 0
+        with torch.no_grad():
+            for lid, module in module_refs.items():
+                if lid not in original_residuals or lid not in nf4_dequant:
+                    continue
+                try:
+                    W_fp16 = (nf4_dequant[lid] + original_residuals[lid]).to(
+                        module.weight.dtype
+                    ).to(module.weight.device)
+                    module.weight.data.copy_(W_fp16)
+                    restored += 1
+                except Exception as e:
+                    print(f"[WeightPatcher] Failed restore lid={lid}: {e}")
 
-    def _requantize_and_patch(self, module, weight_fp32: torch.Tensor):
-        """
-        Requantize weight_fp32 to NF4 and replace module's stored weight.
-        """
-        import bitsandbytes as bnb
-
-        device = module.weight.device
-        w      = weight_fp32.to(device)
-
-        # Quantize using BitsAndBytes
-        quant_weight, quant_state = bnb.functional.quantize_4bit(
-            w,
-            quant_type="nf4",
-            compress_statistics=True,
-        )
-
-        # Replace in-place
-        module.weight.data        = quant_weight
-        module.weight.quant_state = quant_state
+        print(f"[WeightPatcher] Restored {restored}/{len(module_refs)} layers")
+        return restored

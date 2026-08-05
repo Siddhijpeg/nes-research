@@ -61,11 +61,13 @@ class TestResidualExtractor:
 
         model     = make_mock_model(num_layers=4)
         extractor = ResidualExtractor(target_modules=["down_proj"])
-        residuals, fp16, names = extractor.extract(model)
+        # NEW API: returns 4 values
+        residuals, nf4_dequant, module_refs, names = extractor.extract(model)
 
-        assert len(residuals) == 4
-        assert len(fp16)      == 4
-        assert len(names)     == 4
+        assert len(residuals)    == 4
+        assert len(nf4_dequant)  == 4
+        assert len(module_refs)  == 4
+        assert len(names)        == 4
 
     def test_residuals_are_float_tensors(self):
         try:
@@ -75,7 +77,8 @@ class TestResidualExtractor:
 
         model     = make_mock_model(num_layers=2)
         extractor = ResidualExtractor(target_modules=["down_proj"])
-        residuals, _, _ = extractor.extract(model)
+        # NEW API: returns 4 values
+        residuals, _, _, _ = extractor.extract(model)
 
         for lid, tensor in residuals.items():
             assert tensor.dtype in (torch.float32, torch.float16, torch.bfloat16)
