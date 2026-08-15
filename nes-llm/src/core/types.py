@@ -50,10 +50,13 @@ class EmbeddingConfig:
     embedding_strategy:  str   = 'sign'
     carrier_selection:   str   = 'magnitude'
     use_qaci:            bool  = True
+    model_family: str = 'llama' # NEW
+    num_hidden_layers: int = 32
     alpha:               float = 0.25
     noise_level:         float = 0.001
     min_magnitude:       float = 0.001
     percentile_threshold:int   = 25
+    gamma: float = 2.5
 
 
 @dataclass

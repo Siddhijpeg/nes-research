@@ -27,10 +27,10 @@ class QACIPipeline:
         3. CarrierSelector.select()     → top-K indices per layer
     """
 
-    def __init__(self, total_layers: int = 32, gamma: float = 2.5):
+    def __init__(self, total_layers: int, gamma: float = 2.5):
         self.total_layers = total_layers
-        self.profiler     = LayerProfiler()
-        self.scheduler    = CarrierScheduler(gamma=gamma)
+        self.profiler = LayerProfiler()
+        self.scheduler = CarrierScheduler(gamma=gamma)
 
     def select(
         self,

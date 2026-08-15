@@ -41,25 +41,12 @@ class LayerProfiler:
         return min(entropy / (max_entropy + self.eps), 1.0)
 
     def _position_bias(self, layer_id: int, total_layers: int) -> float:
-        """
-        Returns a bias factor based on layer position.
-          - layers 0 – 3   : 0.65  (very early, sensitive)
-          - layers 4 – 7   : 0.80  (early)
-          - layers 8 – 23  : 1.00  (middle — full capacity)
-          - layers 24 – 27 : 0.80  (late)
-          - layers 28 – 31 : 0.65  (very late)
-        """
-        quarter = total_layers // 4
-        if layer_id < quarter // 2:
-            return 0.65
-        elif layer_id < quarter:
-            return 0.80
-        elif layer_id < total_layers - quarter:
-            return 1.00
-        elif layer_id < total_layers - quarter // 2:
-            return 0.80
-        else:
-            return 0.65
+        frac = layer_id / max(total_layers - 1, 1) # normalised 0.0 to 1.0
+        if frac < 0.10: return 0.65 # very early layers (sensitive)
+        elif frac < 0.20: return 0.80 # early layers
+        elif frac < 0.80: return 1.00 # middle layers — full capacity
+        elif frac < 0.90: return 0.80 # late layers
+        else: return 0.65 # very late layers
 
     def profile(
         self,

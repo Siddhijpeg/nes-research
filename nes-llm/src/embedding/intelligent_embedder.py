@@ -37,8 +37,11 @@ class IntelligentEmbedder:
     """
 
     def __init__(self, config: EmbeddingConfig):
-        self.config   = config
-        self.pipeline = QACIPipeline(total_layers=32)
+        self.config = config
+        self.pipeline = QACIPipeline(
+            total_layers=config.num_hidden_layers,
+            gamma=config.gamma,
+        )
         self.strategy = SignEmbeddingStrategy(config)
 
     def embed(
