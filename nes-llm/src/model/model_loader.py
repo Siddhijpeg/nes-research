@@ -8,8 +8,16 @@ Usage:
 
 from typing import Optional, Tuple
 import torch
+import os
 
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
+if torch.backends.mps.is_available():
+    DEVICE = torch.device("mps")
+else:
+    DEVICE = torch.device("cpu")
+
+print(f"Using device: {DEVICE}")
 class ModelLoader:
     """
     Loads a HuggingFace causal LM in NF4 quantization (BitsAndBytes).
