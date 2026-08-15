@@ -92,7 +92,7 @@ class NESConfig:
     total_payload_bits: int            = 50000
     expected_noise_sigma:float         = 0.001
     use_gpu:            bool           = True
-    device:             str            = "cuda:0"
+    device:             str            = "mps:0"
     verbose:            bool           = True
     random_seed:        Optional[int]  = None
 
@@ -118,7 +118,7 @@ class NESConfig:
             total_payload_bits= data.get('total_payload_bits', 50000),
             expected_noise_sigma=data.get('expected_noise_sigma', 0.001),
             use_gpu=            data.get('use_gpu', True),
-            device=             data.get('device', 'cuda:0'),
+            device=             data.get('device', 'mps:0'),
             verbose=            data.get('verbose', True),
             random_seed=        data.get('random_seed', None),
         )

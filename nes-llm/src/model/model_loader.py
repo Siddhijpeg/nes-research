@@ -23,7 +23,7 @@ class ModelLoader:
 
     def __init__(
         self,
-        device:             str  = "cuda:0",
+        device:             str  = "mps:0",
         use_double_quant:   bool = True,
         compute_dtype:      str  = "float16",
     ):

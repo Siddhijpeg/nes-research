@@ -6,7 +6,7 @@ bnb_4bit_quant_type='nf4',
 bnb_4bit_use_double_quant=True,
 bnb_4bit_compute_dtype=torch.float16,
 )
-def load_model_pair(model_id: str, device: str = 'cuda'):
+def load_model_pair(model_id: str, device: str = 'mps:0'):
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
     nf4_model = AutoModelForCausalLM.from_pretrained(
     model_id, quantization_config=NF4_CONFIG,
