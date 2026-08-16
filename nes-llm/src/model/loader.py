@@ -1,4 +1,5 @@
 import torch
+
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -34,7 +35,6 @@ def load_model_pair(model_id: str, device=None):
         trust_remote_code=True
     )
 
-    # NF4 model
     nf4_model = AutoModelForCausalLM.from_pretrained(
         model_id,
         quantization_config=NF4_CONFIG,
@@ -42,7 +42,6 @@ def load_model_pair(model_id: str, device=None):
         trust_remote_code=True
     )
 
-    # FP16 model
     fp16_model = AutoModelForCausalLM.from_pretrained(
         model_id,
         torch_dtype=torch.float16,
@@ -83,8 +82,6 @@ def extract_residuals(nf4_model, fp16_model, family: str):
         nf4_w = nf4_mlp.down_proj.weight
         fp16_w = fp16_mlp.down_proj.weight
 
-        # Move FP16 weights to the same device
-        # as the NF4 weights.
         fp16_w = fp16_w.to(nf4_w.device)
 
         if hasattr(nf4_w, "dequantize"):
