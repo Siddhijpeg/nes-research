@@ -9,18 +9,39 @@ MODEL_REGISTRY = {
 'falcon': { 'root': 'transformer.h', 'mlp': '.mlp', 'attn': '.self_attention' },
 'mixtral': { 'root': 'model.layers', 'mlp': '.block_sparse_moe', 'attn': '.self_attn' },
 }
-def get_layer_module(model, family: str, layer_id: int, component: str = 'mlp'):
-    reg = MODEL_REGISTRY[family]
-    root = model
-    for part in reg['root'].split('.'):
-        root = getattr(root, part)
-        layer = root[layer_id]
-        suffix = reg[component].lstrip('.')
-        return getattr(layer, suffix)
+def get_num_layers(model):
+    if hasattr(model, "model"):
+        base = model.model
+    else:
+        base = model
 
-def get_num_layers(model) -> int:
-    cfg = model.config
-    for attr in ('num_hidden_layers', 'n_layer', 'num_layers'):
-        if hasattr(cfg, attr):
-            return getattr(cfg, attr)
-        raise ValueError('Cannot detect num_layers from model.config')
+    if hasattr(base, "layers"):
+        return len(base.layers)
+
+    raise ValueError(
+        f"Could not find transformer layers in {type(model).__name__}"
+    )
+
+
+def get_layer_module(model, family, layer_idx, component):
+    if hasattr(model, "model"):
+        base = model.model
+    else:
+        base = model
+
+    if not hasattr(base, "layers"):
+        raise ValueError(
+            f"Could not find layers in {type(model).__name__}"
+        )
+
+    layer = base.layers[layer_idx]
+
+    if component == "mlp":
+        return layer.mlp
+
+    if component == "self_attn":
+        return layer.self_attn
+
+    raise ValueError(
+        f"Unknown component: {component}"
+    )
