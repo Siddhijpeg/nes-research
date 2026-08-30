@@ -233,37 +233,11 @@ def load_model_pair(
 # EXTRACT RESIDUALS
 # ============================================================
 
-def extract_residuals(
-    nf4_model,
-    fp16_model,
-    family: str
-) -> dict:
-    """
-    Calculate:
-
-        residual = FP16 weight - dequantized NF4 weight
-
-    for every layer's down_proj.
-
-    Returns:
-        {layer_index: flattened residual tensor}
-    """
-
-    from src.model.registry import (
-        get_layer_module,
-        get_num_layers
-    )
+def extract_residuals(nf4_model, fp16_model, family: str) -> dict:
+    from src.model.registry import get_layer_module, get_num_layers
 
     n = get_num_layers(nf4_model)
-
     residuals = {}
-
-    # --------------------------------------------------------
-    # Iterate through transformer layers
-    # Time Complexity: O(L * W)
-    # L = number of layers
-    # W = number of weights per down_proj
-    # --------------------------------------------------------
 
     for i in range(n):
 
@@ -271,42 +245,42 @@ def extract_residuals(
             nf4_model,
             family,
             i,
-            "mlp"
+            'mlp'
         )
 
         fp16_mlp = get_layer_module(
             fp16_model,
             family,
             i,
-            "mlp"
+            'mlp'
         )
 
         nf4_w = nf4_mlp.down_proj.weight
         fp16_w = fp16_mlp.down_proj.weight
 
-        # Move FP16 weight to the same device
+        # Move FP16 weight to the same device as NF4 weight.
         # Time Complexity: O(W)
         fp16_w = fp16_w.to(nf4_w.device)
 
-        # Dequantize NF4 weight
+        # Dequantize NF4 weight.
         # Time Complexity: O(W)
-        if hasattr(nf4_w, "dequantize"):
+        if hasattr(nf4_w, 'dequantize'):
             dq = nf4_w.dequantize().float()
         else:
             dq = nf4_w.float()
 
-        # Check number of elements before reshaping
+        # Make sure both tensors contain the same number of elements.
         if dq.numel() != fp16_w.numel():
             raise RuntimeError(
-                f"Weight size mismatch at layer {i}: "
-                f"NF4={dq.numel()}, FP16={fp16_w.numel()}"
+                f"Layer {i}: NF4 has {dq.numel()} elements, "
+                f"but FP16 has {fp16_w.numel()} elements."
             )
 
-        # Restore original weight shape
+        # Restore the original FP16 weight shape.
         # Time Complexity: O(W)
         dq = dq.reshape(fp16_w.shape)
 
-        # Calculate residual
+        # Calculate quantization residual.
         # Time Complexity: O(W)
         residuals[i] = (
             fp16_w.float() - dq
