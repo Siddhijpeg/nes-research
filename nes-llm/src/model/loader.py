@@ -84,10 +84,28 @@ def extract_residuals(nf4_model, fp16_model, family: str):
 
         fp16_w = fp16_w.to(nf4_w.device)
 
-        if hasattr(nf4_w, "dequantize"):
+        if hasattr(nf4_w, "quant_state"):
+            try:
+                import bitsandbytes.functional as bnb_func
+                dq = bnb_func.dequantize_4bit(
+                    nf4_w,
+                    nf4_w.quant_state,
+                ).float()
+            except Exception:
+                dq = nf4_w.dequantize().float()
+        elif hasattr(nf4_w, "dequantize"):
             dq = nf4_w.dequantize().float()
         else:
             dq = nf4_w.float()
+
+        if dq.shape != fp16_w.shape:
+            if dq.numel() == fp16_w.numel():
+                dq = dq.reshape(fp16_w.shape)
+            else:
+                raise RuntimeError(
+                    f"Layer {i}: NF4 has {dq.numel()} elements, "
+                    f"but FP16 has {fp16_w.numel()} elements."
+                )
 
         residuals[i] = (
             fp16_w.float() - dq

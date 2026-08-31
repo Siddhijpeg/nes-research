@@ -264,21 +264,29 @@ def extract_residuals(nf4_model, fp16_model, family: str) -> dict:
 
         # Dequantize NF4 weight.
         # Time Complexity: O(W)
-        if hasattr(nf4_w, 'dequantize'):
+        if hasattr(nf4_w, 'quant_state'):
+            try:
+                import bitsandbytes.functional as bnb_func
+                dq = bnb_func.dequantize_4bit(
+                    nf4_w,
+                    nf4_w.quant_state,
+                ).float()
+            except Exception:
+                dq = nf4_w.dequantize().float()
+        elif hasattr(nf4_w, 'dequantize'):
             dq = nf4_w.dequantize().float()
         else:
             dq = nf4_w.float()
 
-        # Make sure both tensors contain the same number of elements.
-        if dq.numel() != fp16_w.numel():
-            raise RuntimeError(
-                f"Layer {i}: NF4 has {dq.numel()} elements, "
-                f"but FP16 has {fp16_w.numel()} elements."
-            )
-
-        # Restore the original FP16 weight shape.
-        # Time Complexity: O(W)
-        dq = dq.reshape(fp16_w.shape)
+        # Make sure the reconstructed weight matches the true FP16 matrix.
+        if dq.shape != fp16_w.shape:
+            if dq.numel() == fp16_w.numel():
+                dq = dq.reshape(fp16_w.shape)
+            else:
+                raise RuntimeError(
+                    f"Layer {i}: NF4 has {dq.numel()} elements, "
+                    f"but FP16 has {fp16_w.numel()} elements."
+                )
 
         # Calculate quantization residual.
         # Time Complexity: O(W)

@@ -1,5 +1,4 @@
 from src.model.loader import load_model_pair, extract_residuals
-from src.model.registry import get_num_layers
 from src.carrier_intelligence.qaci_pipeline import QACIPipeline
 
 import os
@@ -9,9 +8,14 @@ os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 import torch
 
 
-
-if torch.backends.mps.is_available():
-    DEVICE = torch.device("mps")
+if torch.cuda.is_available():
+    DEVICE = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    # The residual extraction probe currently hits unsupported MPS matmul/dequantize
+    # paths (e.g. aten::dequantize.self on MPS). Falling back to CPU avoids the
+    # runtime shape mismatch and keeps the experiment runnable on Apple Silicon.
+    print("MPS detected; forcing CPU for this residual probe because the quantized residual path is not stable on MPS.")
+    DEVICE = torch.device("cpu")
 else:
     DEVICE = torch.device("cpu")
 
@@ -19,14 +23,14 @@ print(f"Using device: {DEVICE}")
 
 
 MODELS = [
-    ("meta-llama/Llama-2-7b", "llama", 32),
-    ("meta-llama/Llama-3.1-8B", "llama", 32),
-    ("mistralai/Mistral-7B-v0.3", "mistral", 32),
-    ("google/gemma-2-9b", "gemma", 42),
-    ("google/gemma-2-2b", "gemma", 26),
-    ("Qwen/Qwen2.5-7B", "qwen", 28),
-    ("Qwen/Qwen2.5-3B", "qwen", 36),
-    ("TinyLlama/TinyLlama-1.1B-Chat-v1.0", "llama", 22),
+    # ("meta-llama/Llama-2-7b", "llama", 32),
+    # ("meta-llama/Llama-3.1-8B", "llama", 32),
+    # ("mistralai/Mistral-7B-v0.3", "mistral", 32)
+    # ("google/gemma-2-9b", "gemma", 42)
+    ("google/gemma-2-2b", "gemma", 26)
+    # ("Qwen/Qwen2.5-7B", "qwen", 28)
+    # ("Qwen/Qwen2.5-3B", "qwen", 36)
+    # ("TinyLlama/TinyLlama-1.1B-Chat-v1.0", "llama", 22)
 ]
 
 
