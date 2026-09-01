@@ -5,7 +5,7 @@ from transformers import (
     AutoTokenizer,
     BitsAndBytesConfig
 )
-
+from bitsandbytes.functional import dequantize_4bit
 
 NF4_CONFIG = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -17,8 +17,8 @@ NF4_CONFIG = BitsAndBytesConfig(
 
 def get_device():
     # MPS is preferred on Apple Silicon Macs.
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
+    # if torch.backends.mps.is_available():
+    #     return torch.device("mps")
 
     return torch.device("cpu")
 
@@ -139,15 +139,16 @@ def extract_residuals(nf4_model, fp16_model, family: str):
         # ---------------------------------------------------------
         # Try BitsAndBytes dequantization
         # ---------------------------------------------------------
-        if hasattr(nf4_w, "dequantize"):
+        if not hasattr(nf4_w, "quant_state") or nf4_w.quant_state is None:
+            raise RuntimeError(
+                f"Layer {i}: NF4 weight does not contain quantization state."
+            )
 
-            dq = nf4_w.dequantize()
-
-        else:
-
-            dq = nf4_w
-
-        dq = dq.float()
+        dq = dequantize_4bit(
+            nf4_w,
+            quant_state=nf4_w.quant_state,
+            quant_type="nf4"
+        ).float()
 
         # ---------------------------------------------------------
         # DIAGNOSTIC: inspect reconstructed tensor
