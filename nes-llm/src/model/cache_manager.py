@@ -1,58 +1,60 @@
 """
-Model Tensor Cache Manager.
+Model Tensor Cache
+==================
 
-Stores expensive preprocessing artifacts produced from an NF4/FP16
-model pair:
+Production-grade disk cache for expensive NES preprocessing.
 
-    - quantization residuals
-    - FP16 reference weights
-    - dequantized NF4 weights
+For every transformer layer we cache:
 
-Design goals:
-    - Per-layer storage
-    - Atomic writes
-    - Manifest-based validation
-    - Cache versioning
-    - CPU-only serialized tensors
-    - Safe cache invalidation when preprocessing configuration changes
+    1. FP16 reference weights
+    2. Dequantized NF4 weights
+    3. Quantization residual
+
+Residual definition:
+
+    R = W_FP16 - W_NF4_dequantized
+
+Directory structure:
+
+    cache/
+    └── models/
+        └── <model-name>/
+            ├── metadata.json
+            ├── layer_0000.pt
+            ├── layer_0001.pt
+            ├── ...
+            └── layer_N.pt
+
+The tensors are ALWAYS stored on CPU.
+
+They are moved to the requested runtime device only when loaded.
+
+This keeps the persistent cache independent of MPS/CPU.
 """
-
-from __future__ import annotations
 
 import hashlib
 import json
-import os
-import tempfile
+import re
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Tuple
 
 import torch
 
 
-CACHE_VERSION = "1.0"
-
-
 class ModelTensorCache:
     """
-    Persistent cache for model preprocessing artifacts.
+    Persistent cache for model preprocessing tensors.
 
-    Cache layout:
+    The cache is model-specific and configuration-specific.
 
-        cache/models/<model_name>/
-            metadata.json
-            manifest.json
-            residuals/
-                layer_000.pt
-                ...
-            fp16/
-                layer_000.pt
-                ...
-            nf4_dequantized/
-                layer_000.pt
-                ...
-
-    All tensors are serialized on CPU.
+    A layer is considered valid only if:
+        - its cache file exists
+        - it can be loaded successfully
+        - required tensors are present
+        - tensor sizes are consistent
     """
+
+    CACHE_VERSION = "1.0"
 
     def __init__(
         self,
@@ -63,217 +65,204 @@ class ModelTensorCache:
         compute_dtype: str = "float16",
     ):
         self.model_id = model_id
+        self.cache_root = Path(cache_root)
+
         self.quantization_type = quantization_type
         self.use_double_quant = use_double_quant
         self.compute_dtype = compute_dtype
 
-        safe_model_name = self._sanitize_model_id(model_id)
+        # ----------------------------------------------------------
+        # Create a filesystem-safe model directory name.
+        # ----------------------------------------------------------
 
-        self.root = (
-            Path(cache_root)
-            / safe_model_name
+        self.model_name = self._sanitize_model_id(model_id)
+
+        self.model_cache_dir = (
+            self.cache_root / self.model_name
         )
 
-        self.residual_dir = self.root / "residuals"
-        self.fp16_dir = self.root / "fp16"
-        self.nf4_dir = self.root / "nf4_dequantized"
+        self.model_cache_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-        self.metadata_path = self.root / "metadata.json"
-        self.manifest_path = self.root / "manifest.json"
+        self.metadata_file = (
+            self.model_cache_dir / "metadata.json"
+        )
 
-    # ------------------------------------------------------------------
-    # Path helpers
-    # ------------------------------------------------------------------
+    # ==============================================================
+    # PATH HELPERS
+    # ==============================================================
 
     @staticmethod
     def _sanitize_model_id(model_id: str) -> str:
         """
-        Convert a HuggingFace model ID into a filesystem-safe name.
+        Convert HuggingFace model ID into a filesystem-safe name.
+
+        Example:
+
+            meta-llama/Llama-3.1-8B
+                ↓
+            meta-llama__llama-3.1-8b
         """
-        return (
-            model_id
-            .replace("/", "_")
-            .replace("\\", "_")
-            .replace(":", "_")
+
+        safe_name = model_id.strip().lower()
+
+        safe_name = re.sub(
+            r"[^a-zA-Z0-9._-]+",
+            "__",
+            safe_name,
         )
 
-    def _layer_path(
-        self,
-        directory: Path,
-        layer_id: int,
-    ) -> Path:
-        return directory / f"layer_{layer_id:03d}.pt"
+        return safe_name
 
-    # ------------------------------------------------------------------
-    # Metadata
-    # ------------------------------------------------------------------
+    def _layer_path(self, layer_id: int) -> Path:
+        """
+        Return cache path for one layer.
+        """
+
+        return (
+            self.model_cache_dir
+            / f"layer_{layer_id:04d}.pt"
+        )
+
+    # ==============================================================
+    # METADATA
+    # ==============================================================
 
     def _configuration(self) -> dict:
+        """
+        Configuration that determines whether a cache is compatible.
+        """
+
         return {
-            "cache_version": CACHE_VERSION,
+            "cache_version": self.CACHE_VERSION,
             "model_id": self.model_id,
             "quantization_type": self.quantization_type,
             "use_double_quant": self.use_double_quant,
             "compute_dtype": self.compute_dtype,
         }
 
-    def initialize(self) -> None:
+    def _write_metadata(self):
         """
-        Create cache directories and metadata if necessary.
+        Atomically write metadata.
+
+        A temporary file is used first so an interrupted write does
+        not leave a corrupted metadata.json.
         """
-        self.residual_dir.mkdir(
-            parents=True,
-            exist_ok=True,
+
+        metadata = self._configuration()
+
+        temp_file = self.metadata_file.with_suffix(
+            ".tmp"
         )
 
-        self.fp16_dir.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        self.nf4_dir.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        if not self.metadata_path.exists():
-            self._atomic_json_write(
-                self.metadata_path,
-                self._configuration(),
+        with open(temp_file, "w") as f:
+            json.dump(
+                metadata,
+                f,
+                indent=4,
             )
 
-    # ------------------------------------------------------------------
-    # Manifest
-    # ------------------------------------------------------------------
+        temp_file.replace(
+            self.metadata_file
+        )
 
-    def _load_manifest(self) -> dict:
-        if not self.manifest_path.exists():
-            return {}
+    def _metadata_matches(self) -> bool:
+        """
+        Check whether existing cache metadata matches the
+        current model/configuration.
+        """
+
+        if not self.metadata_file.exists():
+            return False
 
         try:
-            with self.manifest_path.open(
-                "r",
-                encoding="utf-8",
-            ) as handle:
-                return json.load(handle)
+            with open(self.metadata_file, "r") as f:
+                stored = json.load(f)
 
         except (OSError, json.JSONDecodeError):
-            return {}
+            return False
 
-    def _save_manifest(self, manifest: dict) -> None:
-        self._atomic_json_write(
-            self.manifest_path,
-            manifest,
-        )
+        expected = self._configuration()
 
-    @staticmethod
-    def _tensor_checksum(tensor: torch.Tensor) -> str:
+        return stored == expected
+
+    # ==============================================================
+    # LAYER VALIDATION
+    # ==============================================================
+
+    def validate_layer(self, layer_id: int) -> bool:
         """
-        Generate a deterministic checksum for a tensor.
+        Check whether a cached layer is safe to reuse.
+
+        Returns:
+            True  -> cache exists and appears valid
+            False -> recomputation required
         """
-        cpu_tensor = (
-            tensor.detach()
-            .cpu()
-            .contiguous()
-        )
 
-        digest = hashlib.sha256(
-            cpu_tensor.numpy().tobytes()
-        )
+        if not self._metadata_matches():
+            return False
 
-        return digest.hexdigest()
+        layer_file = self._layer_path(layer_id)
 
-    # ------------------------------------------------------------------
-    # Atomic serialization
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def _atomic_torch_save(
-        tensor: torch.Tensor,
-        destination: Path,
-    ) -> None:
-        """
-        Atomically save a tensor.
-
-        The temporary file is created in the same directory so that
-        os.replace() remains atomic on the same filesystem.
-        """
-        destination.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        fd, temporary = tempfile.mkstemp(
-            dir=destination.parent,
-            suffix=".tmp",
-        )
-
-        os.close(fd)
-
-        temporary_path = Path(temporary)
+        if not layer_file.exists():
+            return False
 
         try:
-            torch.save(
-                tensor.detach().cpu(),
-                temporary_path,
+            data = torch.load(
+                layer_file,
+                map_location="cpu",
+                weights_only=True,
             )
 
-            os.replace(
-                temporary_path,
-                destination,
-            )
+            required_keys = {
+                "residual",
+                "fp16_weight",
+                "nf4_dequantized",
+            }
 
-        finally:
-            if temporary_path.exists():
-                temporary_path.unlink()
+            if not required_keys.issubset(
+                data.keys()
+            ):
+                return False
 
-    @staticmethod
-    def _atomic_json_write(
-        destination: Path,
-        data: dict,
-    ) -> None:
-        """
-        Atomically write JSON metadata.
-        """
-        destination.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+            residual = data["residual"]
+            fp16 = data["fp16_weight"]
+            nf4 = data["nf4_dequantized"]
 
-        fd, temporary = tempfile.mkstemp(
-            dir=destination.parent,
-            suffix=".tmp",
-            text=True,
-        )
+            # ------------------------------------------------------
+            # All tensors must have matching number of elements.
+            # ------------------------------------------------------
 
-        os.close(fd)
+            if residual.numel() != fp16.numel():
+                return False
 
-        temporary_path = Path(temporary)
+            if residual.numel() != nf4.numel():
+                return False
 
-        try:
-            with temporary_path.open(
-                "w",
-                encoding="utf-8",
-            ) as handle:
-                json.dump(
-                    data,
-                    handle,
-                    indent=2,
-                    sort_keys=True,
-                )
+            # ------------------------------------------------------
+            # Cache tensors must be CPU tensors.
+            # ------------------------------------------------------
 
-            os.replace(
-                temporary_path,
-                destination,
-            )
+            if residual.device.type != "cpu":
+                return False
 
-        finally:
-            if temporary_path.exists():
-                temporary_path.unlink()
+            if fp16.device.type != "cpu":
+                return False
 
-    # ------------------------------------------------------------------
-    # Save
-    # ------------------------------------------------------------------
+            if nf4.device.type != "cpu":
+                return False
+
+            return True
+
+        except Exception:
+            # Any corrupted/unreadable cache is treated as a miss.
+            return False
+
+    # ==============================================================
+    # SAVE
+    # ==============================================================
 
     def save_layer(
         self,
@@ -281,209 +270,129 @@ class ModelTensorCache:
         residual: torch.Tensor,
         fp16_weight: torch.Tensor,
         nf4_dequantized: torch.Tensor,
-    ) -> None:
+    ):
         """
-        Save all preprocessing artifacts for one layer.
+        Save one layer to disk.
+
+        Tensors are detached and moved to CPU before serialization.
+
+        The write is atomic:
+            layer_x.pt.tmp
+                    ↓
+            layer_x.pt
+
+        This prevents partially written cache files from being
+        mistaken for valid cache entries.
         """
 
-        self.initialize()
-
-        tensors = {
-            "residuals": (
-                residual,
-                self.residual_dir,
-            ),
-            "fp16": (
-                fp16_weight,
-                self.fp16_dir,
-            ),
-            "nf4_dequantized": (
-                nf4_dequantized,
-                self.nf4_dir,
-            ),
-        }
-
-        manifest = self._load_manifest()
-
-        layer_key = str(layer_id)
-
-        manifest[layer_key] = {
-            "residual": {
-                "shape": list(residual.shape),
-                "dtype": str(residual.dtype),
-                "numel": residual.numel(),
-                "checksum": self._tensor_checksum(residual),
-            },
-            "fp16": {
-                "shape": list(fp16_weight.shape),
-                "dtype": str(fp16_weight.dtype),
-                "numel": fp16_weight.numel(),
-                "checksum": self._tensor_checksum(fp16_weight),
-            },
-            "nf4_dequantized": {
-                "shape": list(nf4_dequantized.shape),
-                "dtype": str(nf4_dequantized.dtype),
-                "numel": nf4_dequantized.numel(),
-                "checksum": self._tensor_checksum(
-                    nf4_dequantized
-                ),
-            },
-        }
-
-        # Complexity:
-        # O(number of parameters in this layer) for serialization.
-        for name, (tensor, directory) in tensors.items():
-
-            path = self._layer_path(
-                directory,
-                layer_id,
-            )
-
-            self._atomic_torch_save(
-                tensor,
-                path,
-            )
-
-        self._save_manifest(manifest)
-
-    # ------------------------------------------------------------------
-    # Validation
-    # ------------------------------------------------------------------
-
-    def has_layer(self, layer_id: int) -> bool:
-        """
-        Check whether all three artifacts for a layer exist.
-        """
-        return (
-            self._layer_path(
-                self.residual_dir,
-                layer_id,
-            ).exists()
-            and
-            self._layer_path(
-                self.fp16_dir,
-                layer_id,
-            ).exists()
-            and
-            self._layer_path(
-                self.nf4_dir,
-                layer_id,
-            ).exists()
+        layer_file = self._layer_path(
+            layer_id
         )
 
-    def validate_layer(self, layer_id: int) -> bool:
-        """
-        Validate cached files against the manifest.
+        temp_file = layer_file.with_suffix(
+            ".tmp"
+        )
 
-        Returns False instead of trusting corrupted/incomplete data.
-        """
+        # ----------------------------------------------------------
+        # Validate before writing.
+        # ----------------------------------------------------------
 
-        if not self.has_layer(layer_id):
-            return False
+        if residual.numel() != fp16_weight.numel():
+            raise ValueError(
+                f"Layer {layer_id}: residual and FP16 "
+                f"tensor sizes do not match."
+            )
 
-        manifest = self._load_manifest()
-        entry = manifest.get(str(layer_id))
+        if residual.numel() != nf4_dequantized.numel():
+            raise ValueError(
+                f"Layer {layer_id}: residual and NF4 "
+                f"tensor sizes do not match."
+            )
 
-        if entry is None:
-            return False
+        # ----------------------------------------------------------
+        # Always persist CPU tensors.
+        # ----------------------------------------------------------
 
-        files = {
-            "residual": self._layer_path(
-                self.residual_dir,
-                layer_id,
-            ),
-            "fp16": self._layer_path(
-                self.fp16_dir,
-                layer_id,
-            ),
-            "nf4_dequantized": self._layer_path(
-                self.nf4_dir,
-                layer_id,
+        payload = {
+            "residual": residual.detach().cpu(),
+            "fp16_weight": fp16_weight.detach().cpu(),
+            "nf4_dequantized": (
+                nf4_dequantized.detach().cpu()
             ),
         }
 
-        try:
-            for name, path in files.items():
+        # ----------------------------------------------------------
+        # Atomic save.
+        # ----------------------------------------------------------
 
-                tensor = torch.load(
-                    path,
-                    map_location="cpu",
-                    weights_only=True,
-                )
+        torch.save(
+            payload,
+            temp_file,
+        )
 
-                expected = entry[name]
+        temp_file.replace(
+            layer_file
+        )
 
-                if list(tensor.shape) != expected["shape"]:
-                    return False
+        # ----------------------------------------------------------
+        # Metadata is created/updated after successful layer save.
+        # ----------------------------------------------------------
 
-                if tensor.numel() != expected["numel"]:
-                    return False
+        if not self.metadata_file.exists():
+            self._write_metadata()
 
-                if self._tensor_checksum(tensor) != expected["checksum"]:
-                    return False
-
-        except (
-            OSError,
-            RuntimeError,
-            ValueError,
-        ):
-            return False
-
-        return True
-
-    # ------------------------------------------------------------------
-    # Load
-    # ------------------------------------------------------------------
+    # ==============================================================
+    # LOAD
+    # ==============================================================
 
     def load_layer(
         self,
         layer_id: int,
-        device: Optional[torch.device] = None,
-    ):
+        device: torch.device = torch.device("cpu"),
+    ) -> Tuple[
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+    ]:
         """
-        Load a validated layer from disk.
+        Load one cached layer.
 
         Returns:
-            residual, fp16_weight, nf4_dequantized
+
+            residual,
+            fp16_weight,
+            nf4_dequantized
+
+        The tensors are moved to `device` after loading.
         """
 
         if not self.validate_layer(layer_id):
             raise RuntimeError(
-                f"Cache validation failed for "
-                f"{self.model_id}, layer {layer_id}"
+                f"Layer {layer_id} cache is missing or invalid: "
+                f"{self._layer_path(layer_id)}"
             )
 
-        residual = torch.load(
-            self._layer_path(
-                self.residual_dir,
-                layer_id,
-            ),
+        layer_file = self._layer_path(
+            layer_id
+        )
+
+        data = torch.load(
+            layer_file,
             map_location="cpu",
             weights_only=True,
         )
 
-        fp16_weight = torch.load(
-            self._layer_path(
-                self.fp16_dir,
-                layer_id,
-            ),
-            map_location="cpu",
-            weights_only=True,
+        residual = data["residual"].to(
+            device
         )
 
-        nf4_dequantized = torch.load(
-            self._layer_path(
-                self.nf4_dir,
-                layer_id,
-            ),
-            map_location="cpu",
-            weights_only=True,
+        fp16_weight = data["fp16_weight"].to(
+            device
         )
 
-        if device is not None:
-            residual = residual.to(device)
-            fp16_weight = fp16_weight.to(device)
-            nf4_dequantized = nf4_dequantized.to(device)
+        nf4_dequantized = data[
+            "nf4_dequantized"
+        ].to(device)
 
         return (
             residual,
@@ -491,31 +400,129 @@ class ModelTensorCache:
             nf4_dequantized,
         )
 
-    # ------------------------------------------------------------------
-    # Cache status
-    # ------------------------------------------------------------------
+    # ==============================================================
+    # CACHE INFORMATION
+    # ==============================================================
 
-    def cached_layers(self) -> list[int]:
+    def cached_layers(self) -> list:
         """
-        Return all layers that pass validation.
+        Return all layer IDs currently present and valid.
         """
-        manifest = self._load_manifest()
 
-        valid = []
+        layers = []
 
-        for layer_id in manifest:
-            layer = int(layer_id)
+        for layer_file in sorted(
+            self.model_cache_dir.glob(
+                "layer_*.pt"
+            )
+        ):
 
-            if self.validate_layer(layer):
-                valid.append(layer)
+            match = re.match(
+                r"layer_(\d+)\.pt",
+                layer_file.name,
+            )
 
-        return sorted(valid)
+            if match is None:
+                continue
 
-    def clear(self) -> None:
+            layer_id = int(
+                match.group(1)
+            )
+
+            if self.validate_layer(
+                layer_id
+            ):
+                layers.append(layer_id)
+
+        return layers
+
+    def is_complete(
+        self,
+        num_layers: int,
+    ) -> bool:
         """
-        Delete this model's cache.
+        Check whether every expected transformer layer
+        has a valid cached representation.
         """
-        import shutil
 
-        if self.root.exists():
-            shutil.rmtree(self.root)
+        if not self._metadata_matches():
+            return False
+
+        for layer_id in range(num_layers):
+
+            if not self.validate_layer(
+                layer_id
+            ):
+                return False
+
+        return True
+
+    # ==============================================================
+    # CACHE SUMMARY
+    # ==============================================================
+
+    def summary(self) -> Dict:
+        """
+        Return cache status information.
+        """
+
+        layers = self.cached_layers()
+
+        return {
+            "model_id": self.model_id,
+            "cache_directory": str(
+                self.model_cache_dir
+            ),
+            "cache_version": self.CACHE_VERSION,
+            "quantization_type": (
+                self.quantization_type
+            ),
+            "double_quant": (
+                self.use_double_quant
+            ),
+            "compute_dtype": (
+                self.compute_dtype
+            ),
+            "cached_layers": layers,
+            "num_cached_layers": len(layers),
+        }
+
+    # ==============================================================
+    # CACHE CLEANUP
+    # ==============================================================
+
+    def clear_layer(
+        self,
+        layer_id: int,
+    ):
+        """
+        Delete one cached layer.
+        """
+
+        layer_file = self._layer_path(
+            layer_id
+        )
+
+        if layer_file.exists():
+            layer_file.unlink()
+
+    def clear(self):
+        """
+        Delete the complete model cache.
+
+        Use carefully.
+        """
+
+        if not self.model_cache_dir.exists():
+            return
+
+        for file in self.model_cache_dir.iterdir():
+
+            if file.is_file():
+                file.unlink()
+
+        # Keep the model directory itself.
+        self.model_cache_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )

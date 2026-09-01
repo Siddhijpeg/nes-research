@@ -2,12 +2,13 @@
 Precompute and cache model weights + NF4 residuals.
 
 The expensive operations:
+
     1. Load FP16 model
     2. Load NF4 model
     3. Dequantize NF4 weights
-    4. Compute residuals
+    4. Compute FP16 - NF4 residuals
 
-are performed once and stored on disk.
+are performed once and cached layer-by-layer.
 
 Later experiments can load the cached tensors directly.
 
@@ -16,23 +17,34 @@ Usage:
 """
 
 import os
-import json
 from pathlib import Path
 
 import torch
 
-from src.model.loader import load_model_pair, extract_residuals
+from src.model.loader import (
+    load_model_pair,
+    extract_residuals,
+)
 
 
-# ------------------------------------------------------------------
-# Configuration
-# ------------------------------------------------------------------
+# ==============================================================
+# CONFIGURATION
+# ==============================================================
 
 MODEL_ID = "meta-llama/Llama-3.1-8B"
 FAMILY = "llama"
 
 CACHE_ROOT = Path("cache/models")
-MODEL_CACHE = CACHE_ROOT / "llama-3.1-8b"
+
+
+# ==============================================================
+# DEVICE
+# ==============================================================
+
+# The models run on MPS.
+#
+# CPU is used only inside extract_residuals() for the
+# BitsAndBytes NF4 dequantization operation.
 
 DEVICE = (
     torch.device("mps")
@@ -43,9 +55,9 @@ DEVICE = (
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 
-# ------------------------------------------------------------------
-# Main
-# ------------------------------------------------------------------
+# ==============================================================
+# MAIN
+# ==============================================================
 
 def main():
 
@@ -56,88 +68,72 @@ def main():
     print(f"Model : {MODEL_ID}")
     print(f"Family: {FAMILY}")
     print(f"Device: {DEVICE}")
-    print(f"Cache : {MODEL_CACHE}")
+    print(f"Cache : {CACHE_ROOT}")
     print("=" * 70)
 
-    MODEL_CACHE.mkdir(parents=True, exist_ok=True)
+    CACHE_ROOT.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    # --------------------------------------------------------------
-    # Prevent accidental overwriting
-    # --------------------------------------------------------------
-
-    metadata_file = MODEL_CACHE / "metadata.json"
-
-    if metadata_file.exists():
-        print("\nCache already exists.")
-        print(f"Location: {MODEL_CACHE}")
-        print("Delete the cache manually if you want to regenerate it.")
-        return
-
-    # --------------------------------------------------------------
+    # ----------------------------------------------------------
     # Load models
-    # --------------------------------------------------------------
+    # ----------------------------------------------------------
 
     nf4_model, fp16_model, _ = load_model_pair(
         MODEL_ID,
-        device=DEVICE
+        device=DEVICE,
     )
 
-    # --------------------------------------------------------------
-    # Compute residuals + reference weights
-    # --------------------------------------------------------------
+    # ----------------------------------------------------------
+    # Compute + cache residuals
+    # ----------------------------------------------------------
 
     print("\nComputing residuals...")
 
     residuals, fp16_weights, quantized_weights = extract_residuals(
-        nf4_model,
-        fp16_model,
-        FAMILY
+        nf4_model=nf4_model,
+        fp16_model=fp16_model,
+        family=FAMILY,
+        model_id=MODEL_ID,
+        cache_root=str(CACHE_ROOT),
+        force_recompute=False,
     )
 
-    # --------------------------------------------------------------
-    # Save tensors
-    # --------------------------------------------------------------
+    # ----------------------------------------------------------
+    # Basic verification
+    # ----------------------------------------------------------
 
-    print("\nSaving cached tensors...")
+    print("\n" + "=" * 70)
+    print("PRECOMPUTATION VERIFICATION")
+    print("=" * 70)
 
-    torch.save(
-        residuals,
-        MODEL_CACHE / "residuals.pt"
+    assert len(residuals) == len(fp16_weights)
+    assert len(residuals) == len(quantized_weights)
+
+    for layer_id in residuals:
+
+        residual = residuals[layer_id]
+        fp16_w = fp16_weights[layer_id]
+        quantized_w = quantized_weights[layer_id]
+
+        assert residual.numel() == fp16_w.numel(), (
+            f"Layer {layer_id}: residual/FP16 size mismatch"
+        )
+
+        assert residual.numel() == quantized_w.numel(), (
+            f"Layer {layer_id}: residual/NF4 size mismatch"
+        )
+
+    print(
+        f"Layers processed : {len(residuals)}"
     )
 
-    torch.save(
-        fp16_weights,
-        MODEL_CACHE / "fp16_weights.pt"
-    )
+    print("Tensor verification: PASSED")
 
-    torch.save(
-        quantized_weights,
-        MODEL_CACHE / "quantized_weights.pt"
-    )
-
-    # --------------------------------------------------------------
-    # Metadata
-    # --------------------------------------------------------------
-
-    metadata = {
-        "model_id": MODEL_ID,
-        "family": FAMILY,
-        "num_layers": len(residuals),
-        "device_used_for_precomputation": str(DEVICE),
-        "dtype_fp16_reference": "float32",
-        "dtype_quantized_dequantized": "float32",
-        "description": (
-            "FP16 reference weights, dequantized NF4 weights, "
-            "and FP16-NF4 residuals."
-        ),
-    }
-
-    with open(metadata_file, "w") as f:
-        json.dump(metadata, f, indent=4)
-
-    # --------------------------------------------------------------
-    # Cleanup
-    # --------------------------------------------------------------
+    # ----------------------------------------------------------
+    # Release models
+    # ----------------------------------------------------------
 
     del nf4_model
     del fp16_model
@@ -145,54 +141,27 @@ def main():
     if torch.backends.mps.is_available():
         torch.mps.empty_cache()
 
-    # --------------------------------------------------------------
-    # Verification
-    # --------------------------------------------------------------
-
-    print("\nVerifying cache...")
-
-    cached_residuals = torch.load(
-        MODEL_CACHE / "residuals.pt",
-        map_location="cpu",
-        weights_only=True
-    )
-
-    cached_fp16 = torch.load(
-        MODEL_CACHE / "fp16_weights.pt",
-        map_location="cpu",
-        weights_only=True
-    )
-
-    cached_quantized = torch.load(
-        MODEL_CACHE / "quantized_weights.pt",
-        map_location="cpu",
-        weights_only=True
-    )
-
-    assert len(cached_residuals) == len(cached_fp16)
-    assert len(cached_residuals) == len(cached_quantized)
-
-    for layer_id in cached_residuals:
-
-        assert (
-            cached_residuals[layer_id].numel()
-            == cached_fp16[layer_id].numel()
-        )
-
-        assert (
-            cached_residuals[layer_id].numel()
-            == cached_quantized[layer_id].numel()
-        )
-
-    print("Cache verification: PASSED")
+    # ----------------------------------------------------------
+    # Complete
+    # ----------------------------------------------------------
 
     print("\n" + "=" * 70)
-    print("CACHE CREATED SUCCESSFULLY")
+    print("PRECOMPUTATION COMPLETE")
     print("=" * 70)
 
-    print(f"Layers cached: {len(cached_residuals)}")
-    print(f"Location     : {MODEL_CACHE}")
+    print(
+        "All layer tensors have been processed through "
+        "the persistent ModelTensorCache."
+    )
 
+    print(
+        f"Cache location: {CACHE_ROOT}"
+    )
+
+
+# ==============================================================
+# ENTRY POINT
+# ==============================================================
 
 if __name__ == "__main__":
     main()
