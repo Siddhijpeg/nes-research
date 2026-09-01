@@ -62,9 +62,10 @@ for model_id, family, n_layers in MODELS:
             )
 
         residuals, fp16_weights, quantized_weights = extract_residuals(
-            nf4,
-            fp16,
-            family
+            nf4_model=nf4,
+            fp16_model=fp16,
+            family=family,
+            model_id=model_id,
         )
 
         config = EmbeddingConfig(
