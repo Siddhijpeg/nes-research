@@ -53,15 +53,13 @@ def load_model_pair(model_id: str, device=None):
 
 
 def extract_residuals(nf4_model, fp16_model, family: str):
-
-    from src.model.registry import (
-        get_layer_module,
-        get_num_layers
-    )
+    from src.model.registry import get_layer_module, get_num_layers
 
     n = get_num_layers(nf4_model)
 
     residuals = {}
+    fp16_weights = {}
+    quantized_weights = {}
 
     for i in range(n):
 
@@ -79,11 +77,20 @@ def extract_residuals(nf4_model, fp16_model, family: str):
             "mlp"
         )
 
+        # FP16 reference weight
+        fp16_w = fp16_mlp.down_proj.weight.detach().float()
+
+        # NF4 quantized weight
         nf4_w = nf4_mlp.down_proj.weight
-        fp16_w = fp16_mlp.down_proj.weight
 
-        fp16_w = fp16_w.to(nf4_w.device)
+        # Dequantize NF4 weight
+        dq = (
+            nf4_w.dequantize().float()
+            if hasattr(nf4_w, "dequantize")
+            else nf4_w.float()
+        )
 
+<<<<<<< Updated upstream
         if hasattr(nf4_w, "quant_state"):
             try:
                 import bitsandbytes.functional as bnb_func
@@ -110,5 +117,25 @@ def extract_residuals(nf4_model, fp16_model, family: str):
         residuals[i] = (
             fp16_w.float() - dq
         ).flatten()
+=======
+        # Make sure shapes match
+        if dq.numel() != fp16_w.numel():
+            raise RuntimeError(
+                f"Layer {i}: shape mismatch: "
+                f"FP16={fp16_w.shape}, NF4={dq.shape}"
+            )
 
-    return residuals
+        dq = dq.reshape(fp16_w.shape)
+>>>>>>> Stashed changes
+
+        # Quantization residual
+        residual = fp16_w - dq
+
+        # Store everything
+        residuals[i] = residual.flatten()
+
+        fp16_weights[i] = fp16_w.flatten()
+
+        quantized_weights[i] = dq.flatten()
+
+    return residuals, fp16_weights, quantized_weights

@@ -61,7 +61,7 @@ for model_id, family, n_layers in MODELS:
                 f"detected {actual_layers}"
             )
 
-        residuals = extract_residuals(
+        residuals, fp16_weights, quantized_weights = extract_residuals(
             nf4,
             fp16,
             family
@@ -77,7 +77,9 @@ for model_id, family, n_layers in MODELS:
             config
         ).embed(
             MESSAGE,
-            residuals
+            residuals,
+            fp16_weights=fp16_weights,
+            quantized_weights=quantized_weights
         )
 
         recovered, s = DecryptPipeline(
