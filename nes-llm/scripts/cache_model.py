@@ -31,8 +31,8 @@ from src.model.loader import (
 # CONFIGURATION
 # ==============================================================
 
-MODEL_ID = "meta-llama/Llama-3.1-8B"
-FAMILY = "llama"
+MODEL_ID = "Qwen/Qwen2.5-3B"
+FAMILY = "qwen"
 
 CACHE_ROOT = Path("cache/models")
 

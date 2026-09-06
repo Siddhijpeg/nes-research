@@ -1,0 +1,7 @@
+{
+    "cache_version": "1.0",
+    "model_id": "google/gemma-2-9b",
+    "quantization_type": "nf4",
+    "use_double_quant": true,
+    "compute_dtype": "float16"
+}

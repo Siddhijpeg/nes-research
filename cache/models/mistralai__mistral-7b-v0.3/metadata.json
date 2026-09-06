@@ -1,0 +1,7 @@
+{
+    "cache_version": "1.0",
+    "model_id": "mistralai/Mistral-7B-v0.3",
+    "quantization_type": "nf4",
+    "use_double_quant": true,
+    "compute_dtype": "float16"
+}

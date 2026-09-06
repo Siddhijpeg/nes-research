@@ -328,13 +328,9 @@ def extract_residuals(
             # experiment pipeline expects runtime tensors there.
             # --------------------------------------------------
 
-            runtime_device = next(
-                fp16_model.parameters()
-            ).device
-
             residual, fp16_w, dq = cache.load_layer(
                 i,
-                device=runtime_device,
+                device="cpu",
             )
 
             residuals[i] = residual
