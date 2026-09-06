@@ -265,14 +265,11 @@ def extract_residuals(nf4_model, fp16_model, family: str) -> dict:
         # Dequantize NF4 weight.
         # Time Complexity: O(W)
         if hasattr(nf4_w, 'quant_state'):
-            try:
-                import bitsandbytes.functional as bnb_func
-                dq = bnb_func.dequantize_4bit(
-                    nf4_w,
-                    nf4_w.quant_state,
-                ).float()
-            except Exception:
-                dq = nf4_w.dequantize().float()
+            import bitsandbytes.functional as bnb_func
+            dq = bnb_func.dequantize_4bit(
+                getattr(nf4_w, 'data', nf4_w),
+                nf4_w.quant_state,
+            ).float()
         elif hasattr(nf4_w, 'dequantize'):
             dq = nf4_w.dequantize().float()
         else:

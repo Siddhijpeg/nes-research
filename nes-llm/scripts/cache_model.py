@@ -92,12 +92,10 @@ def main():
     print("\nComputing residuals...")
 
     residuals, fp16_weights, quantized_weights = extract_residuals(
-        nf4_model=nf4_model,
-        fp16_model=fp16_model,
-        family=FAMILY,
-        model_id=MODEL_ID,
-        cache_root=str(CACHE_ROOT),
-        force_recompute=False,
+        nf4_model,
+        fp16_model,
+        FAMILY,
+        MODEL_ID,
     )
 
     # ----------------------------------------------------------

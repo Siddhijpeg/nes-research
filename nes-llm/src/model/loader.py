@@ -1,3 +1,5 @@
+import copy
+
 import torch
 
 from transformers import (
@@ -27,9 +29,11 @@ def get_device():
     """
     Prefer Apple Silicon MPS when available.
 
-    The model itself runs on MPS.
-    NF4 dequantization is temporarily performed on CPU because
-    BitsAndBytes dequantization is not fully supported on MPS.
+    The models run on MPS.
+
+    NF4 dequantization is performed on CPU because the
+    BitsAndBytes 4-bit dequantization path is not reliable
+    for MPS tensors.
     """
 
     if torch.backends.mps.is_available():
@@ -43,6 +47,16 @@ def get_device():
 # ==============================================================
 
 def load_model_pair(model_id: str, device=None):
+    """
+    Load:
+
+        1. NF4 quantized model
+        2. FP16 reference model
+        3. Tokenizer
+
+    The models themselves are placed on the requested runtime
+    device, normally MPS on Apple Silicon.
+    """
 
     if device is None:
         device = get_device()
@@ -85,6 +99,105 @@ def load_model_pair(model_id: str, device=None):
 
 
 # ==============================================================
+# QUANTIZATION STATE → CPU
+# ==============================================================
+
+def _quant_state_to_cpu(qstate):
+    """
+    Create a CPU-safe copy of a BitsAndBytes QuantState.
+
+    Moving the packed NF4 parameter to CPU does NOT necessarily
+    move every tensor contained inside its QuantState.
+
+    This matters especially when double quantization is enabled.
+
+    Tensor attributes commonly used by BitsAndBytes include:
+
+        - absmax
+        - code
+        - offset
+        - quant_map
+        - nested_absmax
+        - nested_quant_map
+
+    Different BitsAndBytes versions may represent nested
+    quantization state differently, so both `nested` and
+    `state2` are handled.
+    """
+
+    if qstate is None:
+        return None
+
+    # ----------------------------------------------------------
+    # Make a shallow copy so the original model's QuantState
+    # is never modified.
+    # ----------------------------------------------------------
+
+    state_cpu = copy.copy(qstate)
+
+    # ----------------------------------------------------------
+    # Move tensor attributes to CPU.
+    # ----------------------------------------------------------
+
+    tensor_attributes = (
+        "absmax",
+        "code",
+        "offset",
+        "quant_map",
+        "nested_absmax",
+        "nested_quant_map",
+    )
+
+    for attr in tensor_attributes:
+
+        value = getattr(
+            state_cpu,
+            attr,
+            None,
+        )
+
+        if torch.is_tensor(value):
+
+            setattr(
+                state_cpu,
+                attr,
+                value.detach().to("cpu"),
+            )
+
+    # ----------------------------------------------------------
+    # Handle nested QuantState.
+    #
+    # BitsAndBytes versions can use different attribute names.
+    # ----------------------------------------------------------
+
+    nested = getattr(
+        state_cpu,
+        "nested",
+        None,
+    )
+
+    if nested is not None:
+
+        state_cpu.nested = _quant_state_to_cpu(
+            nested
+        )
+
+    state2 = getattr(
+        state_cpu,
+        "state2",
+        None,
+    )
+
+    if state2 is not None:
+
+        state_cpu.state2 = _quant_state_to_cpu(
+            state2
+        )
+
+    return state_cpu
+
+
+# ==============================================================
 # RESIDUAL EXTRACTION + CACHING
 # ==============================================================
 
@@ -103,7 +216,7 @@ def extract_residuals(
 
         R = W_FP16 - W_NF4_dequantized
 
-    Three tensors are maintained for each layer:
+    Three tensors are maintained for every layer:
 
         residuals[i]
         fp16_weights[i]
@@ -112,11 +225,35 @@ def extract_residuals(
     Expensive NF4 dequantization is cached to disk so later
     experiments can reuse the precomputed tensors.
 
+    Architecture:
+
+        Model execution
+            ↓
+           MPS
+            ↓
+        NF4 parameter
+            ↓
+           CPU
+            ↓
+        NF4 dequantization
+            ↓
+        FP32 NF4 weight
+            ↓
+        FP16 reference → CPU
+            ↓
+        residual = FP16 - NF4
+            ↓
+        CPU cache
+
     Important:
-        - Model loading happens on MPS.
+
+        - Models remain on MPS.
         - NF4 dequantization happens on CPU.
-        - The resulting tensor is moved back to MPS.
-        - Cache files are stored on CPU.
+        - QuantState is also moved to CPU.
+        - Residual calculation happens on CPU.
+        - Cache files contain CPU tensors only.
+        - We do NOT move the huge dequantized matrix back
+          to MPS during preprocessing.
     """
 
     from src.model.registry import (
@@ -132,7 +269,9 @@ def extract_residuals(
     # Number of transformer layers
     # ----------------------------------------------------------
 
-    n = get_num_layers(nf4_model)
+    n = get_num_layers(
+        nf4_model
+    )
 
     # ----------------------------------------------------------
     # Initialize cache manager
@@ -145,6 +284,14 @@ def extract_residuals(
         use_double_quant=True,
         compute_dtype="float16",
     )
+
+    # ----------------------------------------------------------
+    # Runtime dictionaries
+    #
+    # NOTE:
+    # These currently contain the complete model's tensors.
+    # The persistent cache itself remains layer-by-layer.
+    # ----------------------------------------------------------
 
     residuals = {}
     fp16_weights = {}
@@ -160,9 +307,9 @@ def extract_residuals(
 
     for i in range(n):
 
-        # ------------------------------------------------------
+        # ======================================================
         # CACHE HIT
-        # ------------------------------------------------------
+        # ======================================================
 
         if (
             not force_recompute
@@ -174,8 +321,13 @@ def extract_residuals(
                 f"loading from cache"
             )
 
+            # --------------------------------------------------
             # Cache is stored on CPU.
-            # Move tensors to the FP16 model's device for runtime.
+            #
+            # Load to the runtime device because the current
+            # experiment pipeline expects runtime tensors there.
+            # --------------------------------------------------
+
             runtime_device = next(
                 fp16_model.parameters()
             ).device
@@ -191,9 +343,9 @@ def extract_residuals(
 
             continue
 
-        # ------------------------------------------------------
+        # ======================================================
         # CACHE MISS
-        # ------------------------------------------------------
+        # ======================================================
 
         print(
             f"Layer {i:02d}: "
@@ -218,124 +370,219 @@ def extract_residuals(
             "mlp",
         )
 
-        # ------------------------------------------------------
-        # FP16 reference weight
-        # ------------------------------------------------------
+        # ======================================================
+        # FP16 REFERENCE WEIGHT
+        # ======================================================
 
-        fp16_w = (
+        # The model is on MPS, but preprocessing is performed
+        # on CPU to avoid large MPS allocations.
+
+        fp16_w_cpu = (
             fp16_mlp
             .down_proj
             .weight
             .detach()
             .float()
+            .to("cpu")
         )
 
-        # ------------------------------------------------------
-        # NF4 quantized parameter
-        # ------------------------------------------------------
+        # ======================================================
+        # NF4 QUANTIZED PARAMETER
+        # ======================================================
 
-        nf4_w = nf4_mlp.down_proj.weight
+        nf4_w = (
+            nf4_mlp
+            .down_proj
+            .weight
+        )
 
         # ======================================================
         # NF4 DEQUANTIZATION
         # ======================================================
 
-        """
-        Params4bit contains compressed NF4 values.
+        # ------------------------------------------------------
+        # Get the BitsAndBytes quantization state BEFORE moving
+        # the parameter data.
+        # ------------------------------------------------------
 
-        On MPS:
+        qstate = getattr(
+            nf4_w,
+            "quant_state",
+            None,
+        )
 
-            NF4 Params4bit
-                    |
-                    v
-                  CPU
-                    |
-                    v
-              dequantize()
-                    |
-                    v
-             FP32 tensor
-                    |
-                    v
-                  MPS
-        """
+        if qstate is None:
 
-        nf4_cpu = nf4_w.detach().to("cpu")
+            raise RuntimeError(
+                f"Layer {i}: NF4 parameter does not contain "
+                f"a BitsAndBytes quant_state."
+            )
 
-        dq_cpu = (
-            nf4_cpu
-            .dequantize()
-            .float()
+        # ------------------------------------------------------
+        # Move the entire QuantState to CPU.
+        #
+        # This is the critical fix for the previous:
+        #
+        #     Expected all tensors to be on the same device
+        #
+        # error.
+        # ------------------------------------------------------
+
+        qstate_cpu = _quant_state_to_cpu(
+            qstate
         )
 
         # ------------------------------------------------------
-        # Shape validation
+        # Get packed NF4 data.
         # ------------------------------------------------------
 
-        if dq_cpu.numel() != fp16_w.numel():
+        qweight = getattr(
+            nf4_w,
+            "data",
+            nf4_w,
+        )
+
+        qweight_cpu = (
+            qweight
+            .detach()
+            .to("cpu")
+        )
+
+        # ------------------------------------------------------
+        # Functional BitsAndBytes dequantization.
+        #
+        # Both:
+        #
+        #     qweight_cpu
+        #     qstate_cpu
+        #
+        # are now on CPU.
+        # ------------------------------------------------------
+
+        import bitsandbytes.functional as bnb_func
+
+        dq_cpu = bnb_func.dequantize_4bit(
+            qweight_cpu,
+            qstate_cpu,
+        ).float()
+
+        # ======================================================
+        # SHAPE VALIDATION
+        # ======================================================
+
+        expected_shape = getattr(
+            qstate,
+            "shape",
+            None,
+        )
+
+        if (
+            expected_shape is not None
+            and dq_cpu.shape != expected_shape
+        ):
+
+            try:
+
+                dq_cpu = dq_cpu.reshape(
+                    expected_shape
+                )
+
+            except RuntimeError:
+                # If the number of elements is checked below,
+                # we will raise a more informative error there.
+                pass
+
+        # ------------------------------------------------------
+        # Final element-count validation
+        # ------------------------------------------------------
+
+        if dq_cpu.numel() != fp16_w_cpu.numel():
 
             raise RuntimeError(
                 f"Layer {i}: shape mismatch after "
                 f"NF4 dequantization: "
-                f"FP16={fp16_w.shape} "
-                f"({fp16_w.numel()} elements), "
+                f"FP16={fp16_w_cpu.shape} "
+                f"({fp16_w_cpu.numel()} elements), "
                 f"NF4={dq_cpu.shape} "
                 f"({dq_cpu.numel()} elements)"
             )
 
         # ------------------------------------------------------
-        # Restore original matrix shape
+        # Restore original FP16 matrix shape.
         # ------------------------------------------------------
 
         dq_cpu = dq_cpu.reshape(
-            fp16_w.shape
-        )
-
-        # ------------------------------------------------------
-        # Move dequantized NF4 weight to model device
-        # ------------------------------------------------------
-
-        dq = dq_cpu.to(
-            fp16_w.device
+            fp16_w_cpu.shape
         )
 
         # ======================================================
         # QUANTIZATION RESIDUAL
         # ======================================================
 
-        residual = fp16_w - dq
+        # Both tensors are CPU tensors.
+        #
+        # R = W_FP16 - W_NF4
 
-        # ------------------------------------------------------
-        # Runtime representation
-        # ------------------------------------------------------
+        residual_cpu = (
+            fp16_w_cpu
+            - dq_cpu
+        )
 
-        residuals[i] = residual.flatten()
+        # ======================================================
+        # RUNTIME REPRESENTATION
+        # ======================================================
 
-        fp16_weights[i] = fp16_w.flatten()
+        # The persistent cache is CPU-based.
+        #
+        # For the current API, keep cache-miss results on CPU
+        # as well. This prevents a huge per-layer MPS allocation
+        # during preprocessing.
 
-        quantized_weights[i] = dq.flatten()
+        residuals[i] = (
+            residual_cpu.flatten()
+        )
+
+        fp16_weights[i] = (
+            fp16_w_cpu.flatten()
+        )
+
+        quantized_weights[i] = (
+            dq_cpu.flatten()
+        )
 
         # ======================================================
         # SAVE CACHE
         # ======================================================
 
-        """
-        Save CPU copies.
-
-        This is important because the cache should not depend
-        on MPS tensors or GPU/accelerator memory.
-        """
-
         cache.save_layer(
             layer_id=i,
-            residual=residual.flatten(),
-            fp16_weight=fp16_w.flatten(),
-            nf4_dequantized=dq.flatten(),
+            residual=residual_cpu.flatten(),
+            fp16_weight=fp16_w_cpu.flatten(),
+            nf4_dequantized=dq_cpu.flatten(),
         )
 
         print(
             f"Layer {i:02d}: "
             f"cached successfully"
+        )
+
+        # ------------------------------------------------------
+        # Explicitly release temporary references.
+        #
+        # Important for large 7B/8B models on unified memory.
+        # ------------------------------------------------------
+
+        del (
+            nf4_mlp,
+            fp16_mlp,
+            nf4_w,
+            qweight,
+            qweight_cpu,
+            qstate,
+            qstate_cpu,
+            dq_cpu,
+            fp16_w_cpu,
+            residual_cpu,
         )
 
     # ==========================================================
