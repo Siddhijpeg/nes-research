@@ -1,0 +1,7 @@
+{
+    "cache_version": "1.0",
+    "model_id": "meta-llama/Llama-3.1-8B",
+    "quantization_type": "nf4",
+    "use_double_quant": true,
+    "compute_dtype": "float16"
+}
