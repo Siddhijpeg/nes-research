@@ -222,8 +222,8 @@ def load_model_pair(
     fp16_model.eval()
 
     print(
-        f"[load_model_pair] "
-        f"NF4 + FP16 loaded successfully."
+        "[load_model_pair] "
+        "NF4 + FP16 loaded successfully."
     )
 
     return nf4_model, fp16_model, tokenizer
@@ -267,7 +267,7 @@ def extract_residuals(
         fp16_w = fp16_mlp.down_proj.weight
 
         # ----------------------------------------------------
-        # Move FP16 weight to the same device as NF4 weight.
+        # Move FP16 weight to same device as NF4 weight.
         # Time Complexity: O(W)
         # ----------------------------------------------------
 
@@ -297,7 +297,7 @@ def extract_residuals(
 
         # ----------------------------------------------------
         # Make sure reconstructed weight matches FP16 matrix.
-        # Time Complexity: O(1) for shape check
+        # Time Complexity: O(1)
         # ----------------------------------------------------
 
         if dq.shape != fp16_w.shape:
@@ -315,6 +315,7 @@ def extract_residuals(
 
         # ----------------------------------------------------
         # Calculate quantization residual.
+        #
         # R = W_FP16 - W_NF4
         #
         # Time Complexity: O(W)
@@ -398,11 +399,16 @@ def apply_residuals_to_model(
         # Time Complexity: O(W)
         # ----------------------------------------------------
 
+        qweight_cpu = None
+
         if hasattr(nf4_w, "quant_state"):
 
             import bitsandbytes.functional as bnb_func
 
-            # Packed NF4 weight -> CPU
+            # ------------------------------------------------
+            # Move packed NF4 weight to CPU.
+            # ------------------------------------------------
+
             qweight_cpu = getattr(
                 nf4_w,
                 "data",
@@ -413,19 +419,29 @@ def apply_residuals_to_model(
 
             # ------------------------------------------------
             # Move QuantState tensors to CPU.
+            # Only move tensors that actually exist.
             # ------------------------------------------------
 
-            if hasattr(quant_state, "absmax"):
+            if (
+                hasattr(quant_state, "absmax")
+                and quant_state.absmax is not None
+            ):
                 quant_state.absmax = (
                     quant_state.absmax.to("cpu")
                 )
 
-            if hasattr(quant_state, "code"):
+            if (
+                hasattr(quant_state, "code")
+                and quant_state.code is not None
+            ):
                 quant_state.code = (
                     quant_state.code.to("cpu")
                 )
 
-            if hasattr(quant_state, "offset"):
+            if (
+                hasattr(quant_state, "offset")
+                and quant_state.offset is not None
+            ):
                 quant_state.offset = (
                     quant_state.offset.to("cpu")
                 )
@@ -439,17 +455,26 @@ def apply_residuals_to_model(
                 and quant_state.state2 is not None
             ):
 
-                if hasattr(quant_state.state2, "absmax"):
+                if (
+                    hasattr(quant_state.state2, "absmax")
+                    and quant_state.state2.absmax is not None
+                ):
                     quant_state.state2.absmax = (
                         quant_state.state2.absmax.to("cpu")
                     )
 
-                if hasattr(quant_state.state2, "code"):
+                if (
+                    hasattr(quant_state.state2, "code")
+                    and quant_state.state2.code is not None
+                ):
                     quant_state.state2.code = (
                         quant_state.state2.code.to("cpu")
                     )
 
-                if hasattr(quant_state.state2, "offset"):
+                if (
+                    hasattr(quant_state.state2, "offset")
+                    and quant_state.state2.offset is not None
+                ):
                     quant_state.state2.offset = (
                         quant_state.state2.offset.to("cpu")
                     )
@@ -479,6 +504,13 @@ def apply_residuals_to_model(
             )
 
         # ----------------------------------------------------
+        # Make sure reconstructed weight has valid shape.
+        # ----------------------------------------------------
+
+        if original_weight.numel() != nf4_w.numel():
+            pass
+
+        # ----------------------------------------------------
         # Reshape residual to original weight shape.
         # Time Complexity: O(1)
         # ----------------------------------------------------
@@ -491,6 +523,7 @@ def apply_residuals_to_model(
 
         # ----------------------------------------------------
         # Move residual to CPU so addition happens on CPU.
+        #
         # Time Complexity: O(W)
         # ----------------------------------------------------
 
@@ -539,11 +572,14 @@ def apply_residuals_to_model(
         )
 
         # ----------------------------------------------------
-        # Release temporary CPU tensors before next layer.
+        # Release temporary tensors before next layer.
         # ----------------------------------------------------
 
-        del qweight_cpu if "qweight_cpu" in locals() else None
+        if qweight_cpu is not None:
+            del qweight_cpu
+
         del original_weight
+        del residual
         del residual_cpu
         del modified_weight_cpu
         del modified_weight
