@@ -233,8 +233,16 @@ def load_model_pair(
 # EXTRACT RESIDUALS
 # ============================================================
 
-def extract_residuals(nf4_model, fp16_model, family: str) -> dict:
-    from src.model.registry import get_layer_module, get_num_layers
+def extract_residuals(
+    nf4_model,
+    fp16_model,
+    family: str
+) -> dict:
+
+    from src.model.registry import (
+        get_layer_module,
+        get_num_layers
+    )
 
     n = get_num_layers(nf4_model)
     residuals = {}
@@ -245,48 +253,73 @@ def extract_residuals(nf4_model, fp16_model, family: str) -> dict:
             nf4_model,
             family,
             i,
-            'mlp'
+            "mlp"
         )
 
         fp16_mlp = get_layer_module(
             fp16_model,
             family,
             i,
-            'mlp'
+            "mlp"
         )
 
         nf4_w = nf4_mlp.down_proj.weight
         fp16_w = fp16_mlp.down_proj.weight
 
+        # ----------------------------------------------------
         # Move FP16 weight to the same device as NF4 weight.
         # Time Complexity: O(W)
+        # ----------------------------------------------------
+
         fp16_w = fp16_w.to(nf4_w.device)
 
+        # ----------------------------------------------------
         # Dequantize NF4 weight.
         # Time Complexity: O(W)
-        if hasattr(nf4_w, 'quant_state'):
+        # ----------------------------------------------------
+
+        if hasattr(nf4_w, "quant_state"):
+
             import bitsandbytes.functional as bnb_func
+
             dq = bnb_func.dequantize_4bit(
-                getattr(nf4_w, 'data', nf4_w),
+                getattr(nf4_w, "data", nf4_w),
                 nf4_w.quant_state,
             ).float()
-        elif hasattr(nf4_w, 'dequantize'):
+
+        elif hasattr(nf4_w, "dequantize"):
+
             dq = nf4_w.dequantize().float()
+
         else:
+
             dq = nf4_w.float()
 
-        # Make sure the reconstructed weight matches the true FP16 matrix.
+        # ----------------------------------------------------
+        # Make sure reconstructed weight matches FP16 matrix.
+        # Time Complexity: O(1) for shape check
+        # ----------------------------------------------------
+
         if dq.shape != fp16_w.shape:
+
             if dq.numel() == fp16_w.numel():
+
                 dq = dq.reshape(fp16_w.shape)
+
             else:
+
                 raise RuntimeError(
                     f"Layer {i}: NF4 has {dq.numel()} elements, "
                     f"but FP16 has {fp16_w.numel()} elements."
                 )
 
+        # ----------------------------------------------------
         # Calculate quantization residual.
+        # R = W_FP16 - W_NF4
+        #
         # Time Complexity: O(W)
+        # ----------------------------------------------------
+
         residuals[i] = (
             fp16_w.float() - dq
         ).flatten()
@@ -319,6 +352,11 @@ def apply_residuals_to_model(
     Note:
         After modification, the affected down_proj weights are
         no longer represented as BitsAndBytes 4-bit parameters.
+
+    Apple Silicon note:
+        BitsAndBytes NF4 dequantization is performed on CPU because
+        direct MPS dequantization can return an incorrectly shaped
+        packed tensor.
     """
 
     from src.model.registry import (
@@ -348,20 +386,101 @@ def apply_residuals_to_model(
         nf4_w = nf4_mlp.down_proj.weight
 
         # ----------------------------------------------------
-        # Dequantize original NF4 weight
+        # Remember original device.
+        # The model itself remains on MPS.
+        # ----------------------------------------------------
+
+        target_device = nf4_w.device
+
+        # ----------------------------------------------------
+        # Dequantize original NF4 weight safely on CPU.
+        #
         # Time Complexity: O(W)
         # ----------------------------------------------------
 
-        if hasattr(nf4_w, "dequantize"):
+        if hasattr(nf4_w, "quant_state"):
+
+            import bitsandbytes.functional as bnb_func
+
+            # Packed NF4 weight -> CPU
+            qweight_cpu = getattr(
+                nf4_w,
+                "data",
+                nf4_w
+            ).detach().to("cpu")
+
+            quant_state = nf4_w.quant_state
+
+            # ------------------------------------------------
+            # Move QuantState tensors to CPU.
+            # ------------------------------------------------
+
+            if hasattr(quant_state, "absmax"):
+                quant_state.absmax = (
+                    quant_state.absmax.to("cpu")
+                )
+
+            if hasattr(quant_state, "code"):
+                quant_state.code = (
+                    quant_state.code.to("cpu")
+                )
+
+            if hasattr(quant_state, "offset"):
+                quant_state.offset = (
+                    quant_state.offset.to("cpu")
+                )
+
+            # ------------------------------------------------
+            # Move nested double-quantization state to CPU.
+            # ------------------------------------------------
+
+            if (
+                hasattr(quant_state, "state2")
+                and quant_state.state2 is not None
+            ):
+
+                if hasattr(quant_state.state2, "absmax"):
+                    quant_state.state2.absmax = (
+                        quant_state.state2.absmax.to("cpu")
+                    )
+
+                if hasattr(quant_state.state2, "code"):
+                    quant_state.state2.code = (
+                        quant_state.state2.code.to("cpu")
+                    )
+
+                if hasattr(quant_state.state2, "offset"):
+                    quant_state.state2.offset = (
+                        quant_state.state2.offset.to("cpu")
+                    )
+
+            # ------------------------------------------------
+            # CPU NF4 dequantization.
+            # ------------------------------------------------
+
+            original_weight = bnb_func.dequantize_4bit(
+                qweight_cpu,
+                quant_state,
+            ).float()
+
+        elif hasattr(nf4_w, "dequantize"):
+
             original_weight = (
-                nf4_w.dequantize().float()
+                nf4_w.dequantize()
+                .float()
+                .to("cpu")
             )
+
         else:
-            original_weight = nf4_w.float()
+
+            original_weight = (
+                nf4_w.float()
+                .to("cpu")
+            )
 
         # ----------------------------------------------------
-        # Reshape residual to original weight shape
-        # Time Complexity: O(W)
+        # Reshape residual to original weight shape.
+        # Time Complexity: O(1)
         # ----------------------------------------------------
 
         residual = embedded_residuals[i]
@@ -370,28 +489,64 @@ def apply_residuals_to_model(
             original_weight.shape
         )
 
-        residual = residual.to(
-            original_weight.device
-        ).float()
-
         # ----------------------------------------------------
-        # Apply residual
+        # Move residual to CPU so addition happens on CPU.
         # Time Complexity: O(W)
         # ----------------------------------------------------
 
-        modified_weight = (
-            original_weight + residual
+        residual_cpu = (
+            residual.detach()
+            .to("cpu")
+            .float()
         )
 
         # ----------------------------------------------------
-        # Replace parameter
+        # Apply residual.
+        #
+        # modified_weight =
+        #     dequantized_NF4_weight + embedded_residual
+        #
+        # Time Complexity: O(W)
+        # ----------------------------------------------------
+
+        modified_weight_cpu = (
+            original_weight + residual_cpu
+        )
+
+        # ----------------------------------------------------
+        # Move modified weight back to model device.
+        #
+        # Time Complexity: O(W)
+        # ----------------------------------------------------
+
+        modified_weight = modified_weight_cpu.to(
+            target_device,
+            dtype=torch.float16
+        )
+
+        # ----------------------------------------------------
+        # Replace parameter.
+        #
+        # The affected layer is now stored as FP16 rather than
+        # a BitsAndBytes 4-bit parameter.
+        #
         # Time Complexity: O(W)
         # ----------------------------------------------------
 
         nf4_mlp.down_proj.weight = torch.nn.Parameter(
-            modified_weight.to(torch.float16),
+            modified_weight,
             requires_grad=False
         )
+
+        # ----------------------------------------------------
+        # Release temporary CPU tensors before next layer.
+        # ----------------------------------------------------
+
+        del qweight_cpu if "qweight_cpu" in locals() else None
+        del original_weight
+        del residual_cpu
+        del modified_weight_cpu
+        del modified_weight
 
     nf4_model.eval()
 
