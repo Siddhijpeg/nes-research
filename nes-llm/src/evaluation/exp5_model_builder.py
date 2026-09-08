@@ -102,7 +102,7 @@ def build_embedded_eval_model(
         "mlp"
     )
 
-        nf4_weight = nf4_layer.weight
+        nf4_weight = nf4_layer.down_proj.weight
         residual = embedded_residuals[layer_id]
 
         # ---------------------------------------------------------
