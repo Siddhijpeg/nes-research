@@ -8,14 +8,20 @@ Target:
 """
 
 import os
-import torch
 
+# Must be set before importing torch
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
+import torch
 from datasets import load_dataset
 
 from src.model.model_loader import (
     load_model_pair,
     extract_residuals,
-    apply_residuals_to_model,
+)
+
+from src.evaluation.exp5_model_builder import (
+    build_embedded_eval_model,
 )
 
 from src.evaluation.fidelity_validator import FidelityValidator
@@ -26,8 +32,6 @@ from src.core.types import EmbeddingConfig
 # ============================================================
 # DEVICE
 # ============================================================
-
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 if torch.backends.mps.is_available():
     DEVICE = torch.device("mps")
@@ -101,6 +105,7 @@ for model_id, family in MODELS:
     nf4 = None
     fp16 = None
     tok = None
+    embedded_model = None
 
     try:
 
@@ -173,12 +178,24 @@ for model_id, family in MODELS:
         )
 
         # --------------------------------------------------------
-        # 7. Apply embedded residuals
+        # 7. Build Exp5 embedded evaluation model
         # --------------------------------------------------------
+        #
+        # IMPORTANT:
+        # We do NOT modify the NF4 model.
+        #
+        # For each affected layer:
+        #
+        #   W_embedded = W_NF4 + R_embedded
+        #
+        # The resulting FP16 weights are placed into the
+        # separate FP16 evaluation model.
+        #
         # Time Complexity: O(L * W)
-        print("Applying embedded residuals...")
+        #
+        print("\nBuilding embedded evaluation model...")
 
-        apply_residuals_to_model(
+        embedded_model = build_embedded_eval_model(
             nf4,
             fp16,
             embed_result.embedded_residuals,
@@ -193,10 +210,12 @@ for model_id, family in MODELS:
         print("\nCalculating embedded-model PPL...")
 
         ppl_embed = validator.validate_perplexity(
-            nf4,
+            embedded_model,
             tok,
             texts,
         )
+
+        print(f"Embedded PPL: {ppl_embed:.4f}")
 
         # --------------------------------------------------------
         # 9. Compare PPL
@@ -212,14 +231,14 @@ for model_id, family in MODELS:
         # --------------------------------------------------------
         print("\n" + "-" * 70)
         print(f"Model              : {model_id}")
-        print(f"Payload             : {PAYLOAD_BITS:,} bits")
-        print(f"Baseline PPL        : {ppl_base:.4f}")
-        print(f"Embedded PPL        : {ppl_embed:.4f}")
+        print(f"Payload            : {PAYLOAD_BITS:,} bits")
+        print(f"Baseline PPL       : {ppl_base:.4f}")
+        print(f"Embedded PPL       : {ppl_embed:.4f}")
         print(
-            f"PPL degradation    : "
+            f"PPL degradation   : "
             f"{result.ppl_degradation * 100:.3f}%"
         )
-        print(f"Verdict             : {result.status}")
+        print(f"Verdict            : {result.status}")
         print("-" * 70)
 
     except Exception as exc:
@@ -233,6 +252,7 @@ for model_id, family in MODELS:
         # --------------------------------------------------------
         # 11. Release model memory
         # --------------------------------------------------------
+        del embedded_model
         del nf4
         del fp16
         del tok
