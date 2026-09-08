@@ -89,16 +89,18 @@ def build_embedded_eval_model(
         # Time: O(1)
         # ---------------------------------------------------------
         nf4_layer = get_layer_module(
-            nf4_model,
-            layer_id,
-            family
-        )
+        nf4_model,
+        family,
+        layer_id,
+        "mlp"
+    )
 
         fp16_layer = get_layer_module(
-            fp16_model,
-            layer_id,
-            family
-        )
+        fp16_model,
+        family,
+        layer_id,
+        "mlp"
+    )
 
         nf4_weight = nf4_layer.weight
         residual = embedded_residuals[layer_id]
