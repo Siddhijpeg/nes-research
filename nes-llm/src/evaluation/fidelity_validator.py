@@ -138,10 +138,17 @@ class FidelityValidator:
                     padding=True,
                 )
                 input_ids = inputs["input_ids"].to(next(model.parameters()).device)
-                labels    = input_ids.clone()
-                outputs   = model(input_ids=input_ids, labels=labels)
+                labels = input_ids.clone()
+
+                # Ignore padding tokens in the causal-LM loss
+                labels[labels == tokenizer.pad_token_id] = -100
+
+                outputs = model(
+                    input_ids=input_ids,
+                    labels=labels
+                )
                 loss      = outputs.loss
-                n_tokens  = (labels != tokenizer.pad_token_id).sum().item()
+                n_tokens = (labels != -100).sum().item()
                 total_loss   += loss.item() * n_tokens
                 total_tokens += n_tokens
 

@@ -176,7 +176,32 @@ for model_id, family in MODELS:
             MESSAGE,
             residuals,
         )
+        # --------------------------------------------------------
+        # 6B. Measure embedding distortion
+        # --------------------------------------------------------
+        # Time Complexity: O(total residual elements)
+        total_changed = 0
+        max_change = 0.0
+        sum_change = 0.0
 
+        for layer_id in residuals:
+
+            original = residuals[layer_id]
+            embedded = embed_result.embedded_residuals[layer_id]
+
+            delta = (embedded - original).abs()
+
+            total_changed += (delta > 0).sum().item()
+            max_change = max(max_change, delta.max().item())
+            sum_change += delta.sum().item()
+
+        print("\nEmbedding distortion:")
+        print(f"  Changed values : {total_changed:,}")
+        print(f"  Max |delta|    : {max_change:.8f}")
+        print(
+            f"  Mean |delta|   : "
+            f"{sum_change / max(total_changed, 1):.8f}"
+        )
         # --------------------------------------------------------
         # 7. Build Exp5 embedded evaluation model
         # --------------------------------------------------------
