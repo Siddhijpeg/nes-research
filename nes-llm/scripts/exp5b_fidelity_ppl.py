@@ -8,13 +8,13 @@ Target:
 """
 
 import os
-
+import traceback
 # Must be set before importing torch
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
 import torch
 from datasets import load_dataset
-from src.model.model_loader import apply_residuals_to_model
+# from src.model.model_loader import apply_residuals_to_model
 from src.model.model_loader import (
     load_model_pair,
     extract_residuals,
@@ -315,6 +315,8 @@ for model_id, family in MODELS:
         print(
             f"\nERROR: {type(exc).__name__}: {exc}"
         )
+
+        traceback.print_exc()
 
     finally:
 
