@@ -153,7 +153,50 @@ for model_id, family in MODELS:
         )
 
         print(f"Baseline PPL: {ppl_base:.4f}")
+                # --------------------------------------------------------
+        # 4B. Control test — reconstruct using ORIGINAL residuals
+        # --------------------------------------------------------
+        # This checks whether apply_residuals_to_model() itself
+        # changes the model's perplexity.
+        #
+        # Time Complexity: O(L * W)
+        print("\nRunning reconstruction control test...")
 
+        apply_residuals_to_model(
+            nf4,
+            fp16,
+            residuals,
+            family,
+        )
+
+        print("\nCalculating reconstructed-model PPL...")
+
+        ppl_reconstructed = validator.validate_perplexity(
+            nf4,
+            tok,
+            texts,
+        )
+
+        print(
+            f"Reconstructed PPL: "
+            f"{ppl_reconstructed:.4f}"
+        )
+
+        print(
+            f"Control difference: "
+            f"{((ppl_reconstructed - ppl_base) / ppl_base) * 100:.3f}%"
+        )
+                # Reload NF4 model so the actual embedding experiment
+        # starts from the original untouched NF4 model.
+        del nf4
+
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
+
+        nf4, _, _ = load_model_pair(
+            model_id,
+            device=DEVICE,
+        )
         # --------------------------------------------------------
         # 5. Configure NES embedding
         # --------------------------------------------------------
