@@ -2,7 +2,7 @@ import copy
 import torch
 import bitsandbytes.functional as bnb
 
-from src.model.model_registry import get_layer_module
+from src.model.registry import get_layer_module
 
 
 def _move_quant_state_to_cpu(qstate):
