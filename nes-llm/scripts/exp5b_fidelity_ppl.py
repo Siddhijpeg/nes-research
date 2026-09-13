@@ -46,13 +46,13 @@ print(f"Using device: {DEVICE}")
 # ============================================================
 
 MODELS = [
-    ("meta-llama/Llama-3.1-8B", "llama"),
-    ("mistralai/Mistral-7B-v0.3", "mistral"),
-    ("google/gemma-2-9b", "gemma"),
-    ("Qwen/Qwen2.5-7B", "qwen"),
+    # ("meta-llama/Llama-3.1-8B", "llama"),
+    # ("mistralai/Mistral-7B-v0.3", "mistral"),
+    # ("google/gemma-2-9b", "gemma"),
+    # ("Qwen/Qwen2.5-7B", "qwen"),
     ("Qwen/Qwen2.5-3B", "qwen"),
-    ("TinyLlama/TinyLlama-1.1B-Chat-v1.0", "llama"),
-    ("microsoft/Phi-3-mini-4k-instruct", "phi3"),
+    # ("TinyLlama/TinyLlama-1.1B-Chat-v1.0", "llama"),
+    # ("microsoft/Phi-3-mini-4k-instruct", "phi3"),
 ]
 
 
