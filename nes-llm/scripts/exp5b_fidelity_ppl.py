@@ -153,14 +153,59 @@ for model_id, family in MODELS:
         )
 
         print(f"Baseline PPL: {ppl_base:.4f}")
-                # --------------------------------------------------------
-        # 4B. Control test — reconstruct using ORIGINAL residuals
+            # --------------------------------------------------------
+        # 4B. Reconstruction control test
         # --------------------------------------------------------
-        # This checks whether apply_residuals_to_model() itself
-        # changes the model's perplexity.
+        # Reconstruct using ORIGINAL residuals.
+        # No embedding is applied here.
         #
-        # Time Complexity: O(L * W)
-       
+        # W_reconstructed = W_NF4 + R_original
+        #
+        # This tells us whether model reconstruction itself
+        # changes perplexity.
+
+        print("\nBuilding reconstruction control model...")
+
+        reconstructed_model = build_embedded_eval_model(
+            nf4,
+            fp16,
+            residuals,
+            family,
+        )
+
+        print("\nCalculating reconstructed-model PPL...")
+
+        ppl_reconstructed = validator.validate_perplexity(
+            reconstructed_model,
+            tok,
+            texts,
+        )
+
+        control_diff = (
+            (ppl_reconstructed - ppl_base)
+            / ppl_base
+        ) * 100
+
+        print(f"Reconstructed PPL: {ppl_reconstructed:.4f}")
+        print(f"Control difference: {control_diff:.3f}%")
+       # --------------------------------------------------------
+        # 4C. Reload fresh model pair
+        # --------------------------------------------------------
+
+        del reconstructed_model
+        del fp16
+        del nf4
+
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
+
+        print("\nReloading fresh NF4 + FP16 pair for embedding...")
+
+        nf4, fp16, tok = load_model_pair(
+            model_id,
+            device=DEVICE,
+        )
+        print("\nEmbedding payload...")
         # --------------------------------------------------------
         # 5. Configure NES embedding
         # --------------------------------------------------------
