@@ -97,12 +97,14 @@ class RobustnessValidator:
             passed = False
 
         return RobustnessResult(
-            ber_curve=      ber_curve,
-            ber_at_001=     ber_001,
-            ber_at_002=     ber_002,
-            status=         "PASS" if passed else "FAIL",
-            total_bits=     len(original_bits),
-            num_trials=     self.num_trials,
+            ber_curve=ber_curve,
+            ber_at_001=ber_001,
+            ber_at_002=ber_002,
+            status="PASS" if passed else "FAIL",
+            total_bits=len(original_bits),
+            num_trials=self.num_trials,
+            max_ber_at_001=self.max_ber_at_001,
+            max_ber_at_002=self.max_ber_at_002,
         )
 
     # ------------------------------------------------------------------
@@ -124,23 +126,26 @@ class RobustnessValidator:
 
 
 class RobustnessResult:
-    """Result of robustness validation."""
-
     def __init__(
         self,
-        ber_curve:  Dict[float, float],
+        ber_curve: Dict[float, float],
         ber_at_001: float,
         ber_at_002: float,
-        status:     str,
+        status: str,
         total_bits: int,
         num_trials: int,
+        max_ber_at_001: float,
+        max_ber_at_002: float,
     ):
-        self.ber_curve  = ber_curve
+        self.ber_curve = ber_curve
         self.ber_at_001 = ber_at_001
         self.ber_at_002 = ber_at_002
-        self.status     = status
+        self.status = status
         self.total_bits = total_bits
         self.num_trials = num_trials
+
+        self.max_ber_at_001 = max_ber_at_001
+        self.max_ber_at_002 = max_ber_at_002
 
     @property
     def passed(self) -> bool:
@@ -155,16 +160,21 @@ class RobustnessResult:
         ]
 
         for sigma, ber in sorted(self.ber_curve.items()):
+            marker = ""
 
             if abs(sigma - 0.001) < 1e-12:
-                marker = " ✓" if ber < self.max_ber_at_001 else " ✗"
+                marker = (
+                    " ✓ PASS"
+                    if ber < self.max_ber_at_001
+                    else " ✗ FAIL"
+                )
             elif abs(sigma - 0.002) < 1e-12:
-                marker = " ✓" if ber < self.max_ber_at_002 else " ✗"
-            else:
-                marker = ""
+                marker = (
+                    " ✓ PASS"
+                    if ber < self.max_ber_at_002
+                    else " ✗ FAIL"
+                )
 
             lines.append(
                 f"    σ={sigma:.4f}  →  BER={ber:.4f}{marker}"
             )
-
-        return "\n".join(lines)
