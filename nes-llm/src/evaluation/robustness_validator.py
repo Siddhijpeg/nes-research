@@ -26,7 +26,15 @@ class RobustnessValidator:
     Returns a RobustnessResult with per-sigma BER and PASS/FAIL status.
     """
 
-    DEFAULT_SIGMAS = [0.0, 0.0005, 0.001, 0.0015, 0.002, 0.003, 0.005, 0.01]
+    DEFAULT_SIGMAS = [
+        0.0,
+        0.0005,
+        0.001,
+        0.002,
+        0.005,
+        0.010,
+        0.020,
+    ]
 
     def __init__(
         self,
@@ -145,7 +153,18 @@ class RobustnessResult:
             f"  Trials per sigma    : {self.num_trials}",
             "  BER curve:",
         ]
+
         for sigma, ber in sorted(self.ber_curve.items()):
-            marker = " ✓" if ber < 0.05 else " ✗"
-            lines.append(f"    σ={sigma:.4f}  →  BER={ber:.4f}{marker}")
+
+            if abs(sigma - 0.001) < 1e-12:
+                marker = " ✓" if ber < self.max_ber_at_001 else " ✗"
+            elif abs(sigma - 0.002) < 1e-12:
+                marker = " ✓" if ber < self.max_ber_at_002 else " ✗"
+            else:
+                marker = ""
+
+            lines.append(
+                f"    σ={sigma:.4f}  →  BER={ber:.4f}{marker}"
+            )
+
         return "\n".join(lines)
