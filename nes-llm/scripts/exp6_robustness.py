@@ -10,8 +10,6 @@ from src.model.model_loader import (
 
 from src.embedding.intelligent_embedder import IntelligentEmbedder
 from src.core.types import EmbeddingConfig
-from src.embedding.payload_encoder import PayloadEncoder
-from src.crypto.aes_cipher import AESCipher
 from src.evaluation.robustness_validator import RobustnessValidator
 
 
@@ -106,15 +104,6 @@ for model_id, family, n_layers in MODELS:
         # Generate ground-truth encrypted bits
         # ----------------------------------------------------
 
-        msg_bits = PayloadEncoder.text_to_bits(
-            "A" * 1250
-        )
-
-        enc_bits = AESCipher(
-            embed_result.key
-        ).encrypt_to_bits(
-            PayloadEncoder._bits_to_bytes(msg_bits)
-        )
 
         # ----------------------------------------------------
         # Robustness validator
@@ -138,7 +127,7 @@ for model_id, family, n_layers in MODELS:
         result = validator.validate(
             embed_result.embedded_residuals,
             embed_result.carrier_indices,
-            enc_bits,
+            embed_result.embedded_bits,
             SIGMAS
         )
 
