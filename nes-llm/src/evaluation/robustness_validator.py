@@ -178,3 +178,5 @@ class RobustnessResult:
             lines.append(
                 f"    σ={sigma:.4f}  →  BER={ber:.4f}{marker}"
             )
+
+        return "\n".join(lines)
